@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import bs4
 import requests
 import sys
+import os
 
 def get_webpage(word):
     """
@@ -228,6 +229,19 @@ def collins_pretty_print(d):
 
     return
 
+INSTALL_FILE_NAME = "/usr/local/bin/define"
+def install():
+    """
+    Installs a shortcut as "define" command for the current user using the pwd
+    
+    :return: None 
+    """
+    current_file = os.path.abspath(__file__)
+    fp = open(INSTALL_FILE_NAME, "w")
+    fp.write("#!/bin/bash\n")
+    fp.write("python %s $@" % (current_file, ))
+    return
+
 USAGE_STRING = """
 Youdao Online Dictionary Parser
 ===============================
@@ -237,6 +251,7 @@ Usage: python youdao_dict.py [word] [options]
 -h/--help    Display this message
 -v/--verbose Also show examples
 -m5          Only Display the first 5 meaning of each word
+--install    Install this as an utility, "define"
 """
 verbose_flag = False
 m5_flag = False
@@ -253,6 +268,9 @@ for arg in sys.argv:
         m5_flag = True
     elif arg == "-h" or arg == "--help":
         print(USAGE_STRING)
+        sys.exit(0)
+    elif arg == "--install":
+        install()
         sys.exit(0)
 
 collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(sys.argv[1]))))
