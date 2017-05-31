@@ -244,7 +244,7 @@ def install():
     fp.close()
 
     # Also usable by the user
-    os.chmod(INSTALL_FILE_NAME, stat.S_IXUSR)
+    os.chmod(INSTALL_FILE_NAME, stat.S_IRWXO)
 
     print("Install successful")
 
@@ -273,13 +273,17 @@ Usage: python youdao_dict.py [word] [options]
 -h/--help    Display this message
 -v/--verbose Also show examples
 -m5          Only Display the first 5 meaning of each word
---install    Install this as an utility, "define"
+
+--install    Install this as an utility, "define". May need sudo
+--uninstall  Uninstall the "define" utility. May need sudo
 """
 verbose_flag = False
 m5_flag = False
 
 # In case the user put an option before the word
-if len(sys.argv) >= 2 and sys.argv[1][0] == "-":
+if len(sys.argv) >= 2 and \
+   sys.argv[1][0] == "-" and \
+   "install" not in sys.argv[1]:
     print(USAGE_STRING)
     sys.exit(0)
 
