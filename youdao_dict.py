@@ -240,6 +240,12 @@ Usage: python youdao_dict.py [word] [options]
 """
 verbose_flag = False
 m5_flag = False
+
+# In case the user put an option before the word
+if len(sys.argv) >= 2 and sys.argv[1][0] == "-":
+    print(USAGE_STRING)
+    sys.exit(0)
+
 for arg in sys.argv:
     if arg == "-v" or arg == "--verbose":
         verbose_flag = True
