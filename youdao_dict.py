@@ -188,7 +188,6 @@ def add_to_cache(word, d):
     """
     # This is the directory of the current file
     file_dir = os.path.dirname(os.path.abspath(__file__))
-    print file_dir
     cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
 
     # If the cache directory has not yet been created then just create it
@@ -206,6 +205,43 @@ def add_to_cache(word, d):
     fp.close()
 
     return
+
+def check_in_cache(word):
+    """
+    Check whether a word exists in the cache, and if it does then we load from the cache
+    directly and then display. If not in the cache return None
+    
+    :param word: The word to be queried
+    :return: dict/None
+    """
+    # This is the directory of the current file
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    print file_dir
+    cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
+
+    # If the cache directory has not yet been created then just create it
+    if os.path.isdir(cache_dir) is False:
+        return None
+
+    # This is the word file
+    word_file = os.path.join(cache_dir, "%s.json" % (word,))
+    # If the file exists then ignore it
+    if os.path.isfile(word_file) is False:
+        return None
+
+    fp = open(word_file, "r")
+    # If we could not decode the json object just remove the invalid
+    # file and return None
+    try:
+        d = json.load(fp)
+    except ValueError:
+        print("Invalid JSON object: remove %s" % (word_file, ))
+        os.unlink(word_file)
+        fp.close()
+        return None
+
+    fp.close()
+    return d
 
 RED_TEXT_START = "\033[1;31m"
 RED_TEXT_END = "\033[0m"
@@ -363,4 +399,9 @@ verbose_flag = False
 m5_flag = False
 
 process_args()
-collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(sys.argv[1]))))
+query_word = sys.argv[1]
+d = check_in_cache(query_word)
+if d is None:
+    collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(query_word))))
+else:
+    collins_pretty_print(d)
