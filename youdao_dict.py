@@ -216,7 +216,6 @@ def check_in_cache(word):
     """
     # This is the directory of the current file
     file_dir = os.path.dirname(os.path.abspath(__file__))
-    print file_dir
     cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
 
     # If the cache directory has not yet been created then just create it
