@@ -4,6 +4,7 @@ import bs4
 import requests
 import sys
 import os
+import stat
 
 def get_webpage(word):
     """
@@ -240,6 +241,10 @@ def install():
     fp = open(INSTALL_FILE_NAME, "w")
     fp.write("#!/bin/bash\n")
     fp.write("python %s $@" % (current_file, ))
+    fp.close()
+
+    # Also usable by the user
+    os.chmod(INSTALL_FILE_NAME, stat.S_IXUSR)
 
     print("Install successful")
 
