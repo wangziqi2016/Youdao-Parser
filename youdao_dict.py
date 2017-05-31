@@ -272,6 +272,44 @@ def uninstall():
 
     return
 
+def process_args():
+    """
+    This function processes arguments
+    
+    :return: None 
+    """
+    global verbose_flag
+    global m5_flag
+    global USAGE_STRING
+
+    if len(sys.argv) < 2:
+        print(USAGE_STRING)
+        sys.exit(0)
+
+    # In case the user put an option before the word
+    if len(sys.argv) >= 2 and \
+                    sys.argv[1][0] == "-" and \
+                    "install" not in sys.argv[1]:
+        print(USAGE_STRING)
+        sys.exit(0)
+
+    for arg in sys.argv:
+        if arg == "-v" or arg == "--verbose":
+            verbose_flag = True
+        elif arg == "-m5":
+            m5_flag = True
+        elif arg == "-h" or arg == "--help":
+            print(USAGE_STRING)
+            sys.exit(0)
+        elif arg == "--install":
+            install()
+            sys.exit(0)
+        elif arg == "--uninstall":
+            uninstall()
+            sys.exit(0)
+
+    return
+
 USAGE_STRING = """
 Youdao Online Dictionary Parser
 ===============================
@@ -288,30 +326,5 @@ Usage: python youdao_dict.py [word] [options]
 verbose_flag = False
 m5_flag = False
 
-if len(sys.argv) < 2:
-    print(USAGE_STRING)
-    sys.exit(0)
-
-# In case the user put an option before the word
-if len(sys.argv) >= 2 and \
-   sys.argv[1][0] == "-" and \
-   "install" not in sys.argv[1]:
-    print(USAGE_STRING)
-    sys.exit(0)
-
-for arg in sys.argv:
-    if arg == "-v" or arg == "--verbose":
-        verbose_flag = True
-    elif arg == "-m5":
-        m5_flag = True
-    elif arg == "-h" or arg == "--help":
-        print(USAGE_STRING)
-        sys.exit(0)
-    elif arg == "--install":
-        install()
-        sys.exit(0)
-    elif arg == "--uninstall":
-        uninstall()
-        sys.exit(0)
-
+process_args()
 collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(sys.argv[1]))))
