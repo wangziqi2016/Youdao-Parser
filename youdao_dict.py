@@ -4,6 +4,7 @@ import bs4
 import requests
 import sys
 import os
+import json
 import stat
 
 def get_webpage(word):
@@ -168,8 +169,43 @@ def get_collins_dict(tree):
                 "translation": p_list[1].text.strip(),
             })
 
+    # Add the word to the cache
+    add_to_cache(ret["word"], ret)
 
     return ret
+
+CACHE_DIRECTORY = "cache"
+def add_to_cache(word, d):
+    """
+    This function adds a word and its associated dictionary object into the local cache
+    If this word is queried in the future, it will be served from the cache
+    
+    If the word is already in the cache we just ignore it
+    
+    :param word: The word queried 
+    :param d: The dictionary object returned by the parser
+    :return: None
+    """
+    # This is the directory of the current file
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    print file_dir
+    cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
+
+    # If the cache directory has not yet been created then just create it
+    if os.path.isdir(cache_dir) is False:
+        os.mkdir(cache_dir)
+
+    # This is the word file
+    word_file = os.path.join(cache_dir, "%s.json" % (word, ))
+    # If the file exists then ignore it
+    if os.path.isfile(word_file) is True:
+        return
+
+    fp = open(word_file, "w")
+    json.dump(d, fp)
+    fp.close()
+
+    return
 
 RED_TEXT_START = "\033[1;31m"
 RED_TEXT_END = "\033[0m"
