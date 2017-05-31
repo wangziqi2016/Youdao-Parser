@@ -237,13 +237,21 @@ def install():
     
     :return: None 
     """
+    global INSTALL_FILE_NAME
+
+    # Check whether we have already installed the file
+    if os.path.isfile(INSTALL_FILE_NAME) is True:
+        print("You have already installed at location %s" % (INSTALL_FILE_NAME, ))
+        return
+
+    # Get the absolute path of this file and write a bash script
     current_file = os.path.abspath(__file__)
     fp = open(INSTALL_FILE_NAME, "w")
     fp.write("#!/bin/bash\n")
     fp.write("python %s $@" % (current_file, ))
     fp.close()
 
-    # Also usable by the user
+    # Also usable by other users
     os.chmod(INSTALL_FILE_NAME, stat.S_IRWXO)
 
     print("Install successful")
@@ -279,6 +287,10 @@ Usage: python youdao_dict.py [word] [options]
 """
 verbose_flag = False
 m5_flag = False
+
+if len(sys.argv) < 2:
+    print(USAGE_STRING)
+    sys.exit(0)
 
 # In case the user put an option before the word
 if len(sys.argv) >= 2 and \
