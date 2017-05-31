@@ -240,6 +240,23 @@ def install():
     fp = open(INSTALL_FILE_NAME, "w")
     fp.write("#!/bin/bash\n")
     fp.write("python %s $@" % (current_file, ))
+
+    print("Install successful")
+
+    return
+
+def uninstall():
+    """
+    This function uninstalls the "define" utility
+    
+    :return: None 
+    """
+    if os.path.isfile(INSTALL_FILE_NAME) is True:
+        os.unlink(INSTALL_FILE_NAME)
+        print("Uninstall successful")
+    else:
+        print("Did not find the utility - have to previously installed?")
+
     return
 
 USAGE_STRING = """
@@ -271,6 +288,9 @@ for arg in sys.argv:
         sys.exit(0)
     elif arg == "--install":
         install()
+        sys.exit(0)
+    elif arg == "--uninstall":
+        uninstall()
         sys.exit(0)
 
 collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(sys.argv[1]))))
