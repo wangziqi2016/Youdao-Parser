@@ -231,6 +231,9 @@ def collins_pretty_print(d):
 USAGE_STRING = """
 Youdao Online Dictionary Parser
 ===============================
+
+Usage: python youdao_dict.py [word] [options]
+
 -h/--help    Display this message
 -v/--verbose Also show examples
 -m5          Only Display the first 5 meaning of each word
@@ -242,5 +245,8 @@ for arg in sys.argv:
         verbose_flag = True
     elif arg == "-m5":
         m5_flag = True
+    elif arg == "-h" or arg == "--help":
+        print(USAGE_STRING)
+        sys.exit(0)
 
 collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(sys.argv[1]))))
