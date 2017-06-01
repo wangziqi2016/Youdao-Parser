@@ -309,30 +309,42 @@ def get_file_dir():
     """
     return os.path.dirname(os.path.abspath(__file__))
 
-
-INSTALL_FILE_NAME = "/usr/local/bin/define"
+DEFAULT_INSTALL_DIR = "/usr/local/bin"
+INSTALL_FILE_NAME = "define"
 def install():
     """
     Installs a shortcut as "define" command for the current user using the pwd
     
     :return: None 
     """
-    global INSTALL_FILE_NAME
+    # If there are extra arguments then we use the one after --install command
+    # as the path to which we install
+    if len(sys.argv) > 2:
+        install_dir = sys.argv[2]
+    else:
+        install_dir = DEFAULT_INSTALL_DIR
+
+    if os.path.isdir(install_dir) is False:
+        print("Install path %s is invalid. Please choose a valid one" %
+              (install_dir, ))
+
+    # Join these two as the path of the file we write into
+    install_file_path = os.path.join(DEFAULT_INSTALL_DIR, INSTALL_FILE_NAME)
 
     # Check whether we have already installed the file
-    if os.path.isfile(INSTALL_FILE_NAME) is True:
-        print("You have already installed at location %s" % (INSTALL_FILE_NAME, ))
+    if os.path.isfile(install_file_path) is True:
+        print("You have already installed at location %s" % (install_file_path, ))
         return
 
     # Get the absolute path of this file and write a bash script
     current_file = os.path.abspath(__file__)
-    fp = open(INSTALL_FILE_NAME, "w")
+    fp = open(install_file_path, "w")
     fp.write("#!/bin/bash\n")
     fp.write("python %s $@" % (current_file, ))
     fp.close()
 
     # Also usable by other users
-    os.chmod(INSTALL_FILE_NAME, stat.S_IRWXO)
+    os.chmod(install_file_path, stat.S_IRWXO)
 
     print("Install successful")
 
