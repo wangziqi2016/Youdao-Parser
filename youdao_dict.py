@@ -373,8 +373,8 @@ def process_args():
 
     # In case the user put an option before the word
     if len(sys.argv) >= 2 and \
-                    sys.argv[1][0] == "-" and \
-                    sys.argv[1] not in CONTROL_COMMAND_SET:
+       sys.argv[1][0] == "-" and \
+       sys.argv[1] not in CONTROL_COMMAND_SET:
         print(USAGE_STRING)
         sys.exit(0)
 
@@ -392,10 +392,11 @@ def process_args():
         elif arg == "--uninstall":
             uninstall()
             sys.exit(0)
-        else arg == "--cd":
-            # This command will give absolute directory of this file
+        elif arg == "--cd":
+            # This command will print absolute directory of this file
             # and then exit
-
+            print(get_file_dir())
+            sys.exit(0)
 
     return
 
