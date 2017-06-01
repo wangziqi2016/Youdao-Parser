@@ -329,7 +329,7 @@ def install():
               (install_dir, ))
 
     # Join these two as the path of the file we write into
-    install_file_path = os.path.join(DEFAULT_INSTALL_DIR, INSTALL_FILE_NAME)
+    install_file_path = os.path.join(install_dir, INSTALL_FILE_NAME)
 
     # Check whether we have already installed the file
     if os.path.isfile(install_file_path) is True:
@@ -344,7 +344,7 @@ def install():
     fp.close()
 
     # Also usable by other users
-    os.chmod(install_file_path, stat.S_IRWXO)
+    os.chmod(install_file_path, stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
 
     print("Install successful")
 
