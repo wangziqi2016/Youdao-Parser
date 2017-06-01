@@ -148,8 +148,6 @@ def get_collins_dict(tree):
         # Initialize the meanings list
         ret["meanings"] = []
 
-
-
         # This is all meanings
         li_list = tree.find_all("li")
         li_count = -1
@@ -158,13 +156,11 @@ def get_collins_dict(tree):
 
             # Just add stuff into this dict object
             d = {}
-            ret["meanings"].append(d)
 
             # find main div and example div list
             main_div_list = li.select("div.collinsMajorTrans")
             if len(main_div_list) == 0:
-                dbg_printf("Did not find div.collinsMajorTrans")
-                return None
+                continue
             else:
                 main_div = main_div_list[0]
 
@@ -174,13 +170,15 @@ def get_collins_dict(tree):
             # the meaning of the word
             p = main_div.find("p")
             if p is None:
-                dbg_printf("Did not find the <p> under main <div>")
+                dbg_printf("Did not find the <p> under main <div> (index = %d)",
+                           li_count)
                 return None
 
             span = p.find("span")
             if span is None:
-                dbg_printf("Did not find the <span> under the <p> under the main <div>")
-                return None
+                #dbg_printf("Did not find the <span> under the <p> under the main <div> (index = %d)",
+                #           li_count)
+                continue
 
             # Save the category as category attribute
             d["category"] = span.text
@@ -233,6 +231,10 @@ def get_collins_dict(tree):
                     "text": p_list[0].text.strip(),
                     "translation": p_list[1].text.strip(),
                 })
+
+            # Append the dict here such that if we continue before here
+            # the changes will not be committed
+            ret["meanings"].append(d)
 
         # Set the actual key on the webpage
         if actual_key is None:
