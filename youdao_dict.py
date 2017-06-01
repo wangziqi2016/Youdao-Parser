@@ -6,6 +6,45 @@ import sys
 import os
 import json
 import stat
+import inspect
+
+def dbg_printf(format, *args):
+    """
+    C-Style function that writes debugging output to the terminal. If debug flag is off
+    this function does not print anything
+
+    :param format: The format string
+    :param args: Arguments
+    :return: None
+    """
+    global debug_flag
+
+    # Do not print anything annoying
+    if debug_flag is False:
+        return
+
+    frame = inspect.currentframe()
+    prev_frame = frame.f_back
+    code = prev_frame.f_code
+    prev_name = code.co_name
+
+    # Make it more human readable by replacing the name with
+    # an easy to understand one
+    if prev_name == "<module>":
+        prev_name = "[Top Level Module]"
+    else:
+        prev_name += "()"
+
+    # Write the prologue of debugging information
+    sys.stderr.write("%-28s: " % (prev_name,))
+
+    format = format % tuple(args)
+    sys.stderr.write(format)
+
+    # So we do not need to worry about new lines
+    sys.stderr.write('\n')
+
+    return
 
 def get_webpage(word):
     """
@@ -399,7 +438,7 @@ def process_args():
     """
     global verbose_flag
     global m5_flag
-    global USAGE_STRING
+    global debug_flag
 
     if len(sys.argv) < 2:
         print(USAGE_STRING)
@@ -431,6 +470,12 @@ def process_args():
             # and then exit
             print(get_file_dir())
             sys.exit(0)
+        elif arg == "--debug":
+            debug_flag = True
+
+        dbg_printf("Debug flag: %s", debug_flag)
+        dbg_printf("m5 flag: %s", m5_flag)
+        dbg_printf("verbose flag: %s", verbose_flag)
 
     return
 
@@ -443,6 +488,8 @@ Usage: python youdao_dict.py [word] [options]
 -h/--help    Display this message
 -v/--verbose Also show examples
 -m5          Only Display the first 5 meaning of each word
+--debug      Shows debug message (e.g. reasons for parsing failure)
+             Used for developer to debug.
 
 --install  [dir]  Install this as an utility, "define". 
                   Optional argument specifies the location. 
@@ -452,6 +499,7 @@ Usage: python youdao_dict.py [word] [options]
 """
 verbose_flag = False
 m5_flag = False
+debug_flag = False
 
 process_args()
 query_word = sys.argv[1]
