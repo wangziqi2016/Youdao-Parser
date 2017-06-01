@@ -352,13 +352,24 @@ def install():
 
 def uninstall():
     """
-    This function uninstalls the "define" utility
+    This function uninstalls the "define" utility. We search the PATH variable
+    and delete the first file that occurs under the path
     
     :return: None 
     """
-    if os.path.isfile(INSTALL_FILE_NAME) is True:
-        os.unlink(INSTALL_FILE_NAME)
-        print("Uninstall successful")
+    # This is a list of paths that the system will search
+    # if a name without directory is executed
+    path_list = os.environ.get('PATH').split(os.pathsep)
+    for path in path_list:
+        # This is the absolute path to the file that we install
+        define_file_path = os.path.join(path, INSTALL_FILE_NAME)
+
+        # Find the first file that appears and remove it
+        if os.path.isfile(define_file_path) is True:
+            os.unlink(define_file_path)
+            print("Uninstall successful (%s)" %
+                  (define_file_path, ))
+            break
     else:
         print("Did not find the utility - have you previously installed?")
 
@@ -422,9 +433,11 @@ Usage: python youdao_dict.py [word] [options]
 -v/--verbose Also show examples
 -m5          Only Display the first 5 meaning of each word
 
---install    Install this as an utility, "define". May need sudo
---uninstall  Uninstall the "define" utility. May need sudo
---cd         Change to the directory of this file
+--install  [dir]  Install this as an utility, "define". 
+                  Optional argument specifies the location. 
+--uninstall       Uninstall the "define" utility. This removes the first "define"
+                  utility that appears under PATH
+--cd              Change to the directory of this file
 """
 verbose_flag = False
 m5_flag = False
