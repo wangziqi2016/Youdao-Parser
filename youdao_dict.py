@@ -324,6 +324,12 @@ def install():
     else:
         install_dir = DEFAULT_INSTALL_DIR
 
+    # Check whether we have permission to this directory
+    if os.access(install_dir, os.W_OK) is False:
+        print("Access denied. Please try sudo (%s)" %
+              (install_dir, ))
+        return
+
     if os.path.isdir(install_dir) is False:
         print("Install path %s is invalid. Please choose a valid one" %
               (install_dir, ))
@@ -366,6 +372,11 @@ def uninstall():
 
         # Find the first file that appears and remove it
         if os.path.isfile(define_file_path) is True:
+            if os.access(path, os.W_OK) is False:
+                print("Access denied. Please try sudo (%s)" %
+                      (path, ))
+                return
+
             os.unlink(define_file_path)
             print("Uninstall successful (%s)" %
                   (define_file_path, ))
