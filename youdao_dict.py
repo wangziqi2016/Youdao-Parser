@@ -187,7 +187,7 @@ def add_to_cache(word, d):
     :return: None
     """
     # This is the directory of the current file
-    file_dir = os.path.dirname(os.path.abspath(__file__))
+    file_dir = get_file_dir()
     cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
 
     # If the cache directory has not yet been created then just create it
@@ -215,7 +215,7 @@ def check_in_cache(word):
     :return: dict/None
     """
     # This is the directory of the current file
-    file_dir = os.path.dirname(os.path.abspath(__file__))
+    file_dir = get_file_dir()
     cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
 
     # If the cache directory has not yet been created then just create it
@@ -301,6 +301,15 @@ def collins_pretty_print(d):
 
     return
 
+def get_file_dir():
+    """
+    Returns the directory of the current python file
+    
+    :return: str 
+    """
+    return os.path.dirname(os.path.abspath(__file__))
+
+
 INSTALL_FILE_NAME = "/usr/local/bin/define"
 def install():
     """
@@ -339,9 +348,14 @@ def uninstall():
         os.unlink(INSTALL_FILE_NAME)
         print("Uninstall successful")
     else:
-        print("Did not find the utility - have to previously installed?")
+        print("Did not find the utility - have you previously installed?")
 
     return
+
+# The first argument can be one of these without invoking unknown
+# word/command error; These commands are designated with certain management
+# tasks and do not query the dictionary
+CONTROL_COMMAND_SET = set(["--install", "--uninstall", "--cd"])
 
 def process_args():
     """
@@ -360,7 +374,7 @@ def process_args():
     # In case the user put an option before the word
     if len(sys.argv) >= 2 and \
                     sys.argv[1][0] == "-" and \
-                    "install" not in sys.argv[1]:
+                    sys.argv[1] not in CONTROL_COMMAND_SET:
         print(USAGE_STRING)
         sys.exit(0)
 
@@ -378,6 +392,10 @@ def process_args():
         elif arg == "--uninstall":
             uninstall()
             sys.exit(0)
+        else arg == "--cd":
+            # This command will give absolute directory of this file
+            # and then exit
+
 
     return
 
@@ -393,6 +411,7 @@ Usage: python youdao_dict.py [word] [options]
 
 --install    Install this as an utility, "define". May need sudo
 --uninstall  Uninstall the "define" utility. May need sudo
+--cd         Change to the directory of this file
 """
 verbose_flag = False
 m5_flag = False
