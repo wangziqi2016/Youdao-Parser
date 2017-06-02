@@ -211,26 +211,18 @@ def get_collins_dict(tree):
                 if a is not None:
                     # Make it invisible
                     d["category"] = "REDIRECTION"
-
-                    # Quick path: No examples, and just concatenates everything inside the
-                    # <p> tag
-                    meaning = ""
-                    for content in p.contents:
-                        if isinstance(content, bs4.element.Tag) is True and \
-                           content.name == "a" :
-                            meaning = ("See <green>" + content.text.strip() + "</green> ")
                 else:
-                    # Otherwise it is unknown category and we just copy and paste
                     d["category"] = "UNKNOWN"
-                    meaning = ""
-                    for content in p.contents:
-                        if isinstance(content, bs4.element.Tag) is True:
-                            if content.name == "b":
-                                meaning += ("<red>" + content.text.strip() + "</red> ")
-                            else:
-                                meaning += content.text.strip()
+
+                meaning = ""
+                for content in p.contents:
+                    if isinstance(content, bs4.element.Tag) is True:
+                        if content.name == "b":
+                            meaning += ("<red>" + " ".join(content.text.split()) + "</red> ")
                         else:
-                            meaning += content.strip()
+                            meaning += " ".join(content.text.split())
+                    else:
+                        meaning += " ".join(content.split())
 
                 d["text"] = meaning
                 d["examples"] = []
@@ -254,11 +246,11 @@ def get_collins_dict(tree):
                 # <b></b> tags
                 if isinstance(content, bs4.element.Tag) is True and \
                    content.name == "b":
-                    content = "<red>" + content.text + "</red>"
+                    content = "<red>" + " ".join(content.text.split()) + "</red>"
                 elif isinstance(content, bs4.element.Tag):
-                    content = content.text.strip()
+                    content = " ".join(content.text.split())
                 else:
-                    content = content.strip()
+                    content = " ".join(content.split())
 
                 if len(content) == 0:
                     continue
