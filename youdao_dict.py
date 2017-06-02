@@ -383,7 +383,7 @@ def process_color(s):
     s = s.replace("<red>", RED_TEXT_START)
     s = s.replace("</red>", RED_TEXT_END)
     s = s.replace("<green>", GREEN_TEXT_START)
-    s = s.replace("</green>", GREEN_TEXT_START)
+    s = s.replace("</green>", GREEN_TEXT_END)
 
     return s
 
