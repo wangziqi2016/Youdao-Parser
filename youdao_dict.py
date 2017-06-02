@@ -178,18 +178,20 @@ def get_collins_dict(tree):
             # This is possible if this entry is simply a redirection
             if span is None:
                 # Make it invisible
-                d["category"] = ""
+                d["category"] = "REDIRECTION"
 
                 # Quick path: No examples, and just concatenates everything inside the
                 # <p> tag
                 meaning = ""
                 for content in p.contents:
-                    if isinstance(content, bs4.element.Tag) is True:
-                        meaning += (content.contents.strip() + " ")
-                    else:
-                        meaning += (content.strip() + " ")
+                    if isinstance(content, bs4.element.Tag) is True and \
+                       content.name == "a" :
+                        meaning = ("See <green>" + content.text.strip() + "</green> ")
+
                 d["text"] = meaning
                 d["examples"] = []
+
+                ret["meanings"].append(d)
 
                 continue
 
@@ -210,7 +212,7 @@ def get_collins_dict(tree):
                     # <b></b> tags
                     if isinstance(content, bs4.element.Tag) is True and \
                        content.name == "b":
-                        content = "<b>" + content.text + "</b>"
+                        content = "<red>" + content.text + "</red>"
 
                     content = content.strip()
                     if len(content) == 0:
