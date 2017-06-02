@@ -8,6 +8,7 @@ import json
 import stat
 import inspect
 from random import randint
+import glob
 
 def dbg_printf(format, *args):
     """
@@ -311,15 +312,40 @@ CACHE_DIRECTORY = "cache"
 # If this is set to 0 then cache is disabled
 CACHE_MAX_ENTRY = 10
 
-def trim_cache(path, limit):
+def trim_cache(cache_dir, limit):
     """
     Randomly remove cache content under given path until the number of file equals
     or is less than the given limit
     
-    :param path: Under which we store cached file
+    :param cache_dir: Under which we store cached file
     :param limit: The maximum number of entries allowed for the cache
-    :return: int, the number of files we deleted
+    :return: int, the number of files we actually deleted
     """
+    cache_file_list = get_cache_file_list(cache_dir)
+    current_cache_size = len(cache_file_list)
+
+    deleted_count = 0
+    if current_cache_size > limit:
+        # This is the number of files we need to delete
+        delta = current_cache_size - limit
+        # Then do a permutation of the list and pick the first
+        # "deleted_count" elements to delete
+        for i in range(0, delta):
+            exchange_index = randint(0, current_cache_size)
+            # Then exchange the elements
+            t = cache_file_list[exchange_index]
+            cache_file_list[exchange_index] = cache_file_list[i]
+            cache_file_list[i] = t
+
+        for i in range(0, delta):
+            try:
+                os.unlink(cache_file_list[i])
+            except OSError:
+                # Offset the += 1 later
+                deleted_count -= 1
+            deleted_count += 1
+
+    return deleted_count
 
 def add_to_cache(word, d):
     """
@@ -349,18 +375,8 @@ def add_to_cache(word, d):
     # randomly choose one and then remove it
     # -1 means there is no limit
     if CACHE_MAX_ENTRY != -1:
-        cache_file_list = get_cache_file_list(cache_dir)
-        current_cache_size = len(cache_file_list)
-
-        if current_cache_size > CACHE_MAX_ENTRY:
-            # This is the number of files we need to delete
-            delta = current_cache_size - CACHE_MAX_ENTRY
-            # While we still have files to delete, loop to randomly determine
-            # whether we should delete
-            index = 0
-            while delta > 0:
-
-
+        ret = trim_cache(cache_dir, CACHE_MAX_ENTRY)
+        dbg_printf("Deleted %d files from the cache", ret)
 
     # This is the word file
     word_file = os.path.join(cache_dir, "%s.json" % (word, ))
