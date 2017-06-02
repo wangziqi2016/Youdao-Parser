@@ -656,10 +656,10 @@ def process_args():
         elif arg == "--force":
             force_flag = True
 
-        dbg_printf("Debug flag: %s", debug_flag)
-        dbg_printf("m5 flag: %s", m5_flag)
-        dbg_printf("verbose flag: %s", verbose_flag)
-        dbg_printf("force flag: %s", force_flag)
+    dbg_printf("Debug flag: %s", debug_flag)
+    dbg_printf("m5 flag: %s", m5_flag)
+    dbg_printf("verbose flag: %s", verbose_flag)
+    dbg_printf("force flag: %s", force_flag)
 
     return
 
