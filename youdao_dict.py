@@ -85,6 +85,7 @@ def get_collins_dict(tree):
     {
       "word": "The word"
       "phonetic": "The pronunciation"
+      "frequency": 4,    // This is always a number between 1 and 5, or -1 to indicate unknown
       "meanings": [
         {
           "category": "n. v. adj. adv. , etc.",
@@ -100,7 +101,7 @@ def get_collins_dict(tree):
     }
     
     :param tree: The beautiful soup tree
-    :return: dict as specified as above, or None if fails
+    :return: A list of the dict as specified as above, or None if fails
     """
     collins_result = tree.find(id="collinsResult")
     if isinstance(collins_result, bs4.element.Tag) is False:
@@ -147,6 +148,27 @@ def get_collins_dict(tree):
         ret["phonetic"] = em.text
         # Initialize the meanings list
         ret["meanings"] = []
+
+        # Get the frequency span; If no such element just set it to -1
+        # which means the freq is invalid
+        freq_span = h4.select("span.star")
+        if len(freq_span) == 0:
+            ret["frequency"] = -1
+        else:
+            freq = -1
+            star_attr = freq_span[0].attrs["class"]
+            if "star1" in star_attr:
+                freq = 1
+            elif "star2" in star_attr:
+                freq = 2
+            elif "star3" in star_attr:
+                freq = 3
+            elif "star4" in star_attr:
+                freq = 4
+            elif "star5" in star_attr:
+                freq = 5
+
+            ret["frequency"] = freq
 
         # This is all meanings
         li_list = tree.find_all("li")
@@ -381,6 +403,12 @@ def collins_pretty_print(dict_list):
     for d in dict_list:
         print_red(d["word"])
         sys.stdout.write("        ")
+
+        # Write the frequency if it has one
+        freq = d["frequency"]
+        if freq != -1:
+            sys.stdout.write("[%s]        " % ("*" * freq, ))
+
         sys.stdout.write(d["phonetic"])
         sys.stdout.write("\n")
 
