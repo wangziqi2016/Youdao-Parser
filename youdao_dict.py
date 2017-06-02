@@ -637,6 +637,19 @@ def cmd_trim_cache():
 
     return
 
+def cmd_ls_cache():
+    """
+    This function prints cache entries. One word per line
+    
+    :return: None 
+    """
+    cache_file_list = get_cache_file_list(os.path.join(get_file_dir(), CACHE_DIRECTORY))
+    for name in cache_file_list:
+        base_name = os.path.splitext(os.path.basename(name))[0]
+        print(base_name)
+
+    return
+
 # This dict object maps the argument from keyword to the maximum number
 # of arguments (incl. optional arguments)
 CONTROL_COMMAND_DICT = {
