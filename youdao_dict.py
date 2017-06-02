@@ -643,7 +643,8 @@ CONTROL_COMMAND_DICT = {
     "--install": 1,
     "--uninstall": 0,
     "--cd": 0,
-    "--trim-cache": 1
+    "--trim-cache": 1,
+    "--ls-cache": 0,
 }
 
 def process_args():
@@ -707,6 +708,9 @@ def process_args():
             # This processes the cmd line argument
             cmd_trim_cache()
             sys.exit(0)
+        elif arg == "--ls-cache":
+            cmd_ls_cache()
+            sys.exit(0)
         elif arg == "--debug":
             debug_flag = True
         elif arg == "--force":
@@ -746,6 +750,7 @@ The following is used without specifying the [word]
                   The number must be an integer greater than or equal to 0
                   Default value is 0, which means deleting all contents from 
                   the cache
+--ls-cache        List words in the cache. One word each line
 """
 verbose_flag = False
 m5_flag = False
