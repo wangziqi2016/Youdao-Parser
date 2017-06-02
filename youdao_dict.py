@@ -340,7 +340,7 @@ def trim_cache(cache_dir, limit):
     deleted_count = 0
     if current_cache_size >= limit:
         # This is the number of files we need to delete
-        delta = current_cache_size - limit + 1
+        delta = current_cache_size - limit
         # Then do a permutation of the list and pick the first
         # "deleted_count" elements to delete
         for i in range(0, delta):
@@ -388,7 +388,9 @@ def add_to_cache(word, d):
     # randomly choose one and then remove it
     # -1 means there is no limit
     if CACHE_MAX_ENTRY != -1:
-        ret = trim_cache(cache_dir, CACHE_MAX_ENTRY)
+        # Since we will add a new entry after this, so the actual limit
+        # is 1 less than the defined constant
+        ret = trim_cache(cache_dir, CACHE_MAX_ENTRY - 1)
         if ret > 0:
             dbg_printf("Deleted %d file(s) from the cache", ret)
 
@@ -546,7 +548,7 @@ def install():
 
     # Check whether we have permission to this directory
     if os.access(install_dir, os.W_OK) is False:
-        print("Access denied. Please try sudo (%s)" %
+        print("Access to \"%s\" denied. Please try sudo" %
               (install_dir, ))
         return
 
@@ -593,7 +595,7 @@ def uninstall():
         # Find the first file that appears and remove it
         if os.path.isfile(define_file_path) is True:
             if os.access(path, os.W_OK) is False:
-                print("Access denied. Please try sudo (%s)" %
+                print("Access to \"%s\" denied. Please try sudo" %
                       (path, ))
                 return
 
@@ -619,10 +621,10 @@ def cmd_trim_cache():
         try:
             # Use the third argument as the limit and try to convert it
             # from a string to integer
-            limit = int(argv[2])
+            limit = int(sys.argv[2])
         except ValueError:
             print("Invalid limit \"%s\". Please specify the correct limit." %
-                  (argv[2], ))
+                  (sys.argv[2], ))
             sys.exit(1)
 
     if limit < 0:
@@ -641,7 +643,7 @@ CONTROL_COMMAND_DICT = {
     "--install": 1,
     "--uninstall": 0,
     "--cd": 0,
-    "--clear-cache": 1
+    "--trim-cache": 1
 }
 
 def process_args():
@@ -678,7 +680,7 @@ def process_args():
                 print("Please use control command \"%s\" always as the first argument" %
                       (arg, ))
                 sys.exit(1)
-            elif len(sys.argv) != (optional_arg_num + 2):
+            elif len(sys.argv) > (optional_arg_num + 2):
                 print("Please use control command \"%s\" with correct argument (expecting %d)" %
                       (arg, optional_arg_num, ))
                 sys.exit(1)
