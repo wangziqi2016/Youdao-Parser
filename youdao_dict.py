@@ -201,16 +201,31 @@ def get_collins_dict(tree):
             span = p.find("span")
             # This is possible if this entry is simply a redirection
             if span is None:
-                # Make it invisible
-                d["category"] = "REDIRECTION"
+                # if there is an <a> in the <span> then it is a redirection
+                a = p.find("a")
+                if a is not None:
+                    # Make it invisible
+                    d["category"] = "REDIRECTION"
 
-                # Quick path: No examples, and just concatenates everything inside the
-                # <p> tag
-                meaning = ""
-                for content in p.contents:
-                    if isinstance(content, bs4.element.Tag) is True and \
-                       content.name == "a" :
-                        meaning = ("See <green>" + content.text.strip() + "</green> ")
+                    # Quick path: No examples, and just concatenates everything inside the
+                    # <p> tag
+                    meaning = ""
+                    for content in p.contents:
+                        if isinstance(content, bs4.element.Tag) is True and \
+                           content.name == "a" :
+                            meaning = ("See <green>" + content.text.strip() + "</green> ")
+                else:
+                    # Otherwise it is unknown category and we just copy and paste
+                    d["category"] = "UNKNOWN"
+                    meaning = ""
+                    for content in p.contents:
+                        if isinstance(content, bs4.element.Tag) is True:
+                            if content.name == "b":
+                                meaning += ("<red>" + content.text.strip() + "</red> ")
+                            else:
+                                meaning += content.text.strip()
+                        else:
+                            meaning += content.strip()
 
                 d["text"] = meaning
                 d["examples"] = []
@@ -223,35 +238,33 @@ def get_collins_dict(tree):
             d["category"] = span.text
             # Then for all text and child nodes in p, find the span
             # and then add all strings together after it
-            start_concat = False
             meaning = ""
             for content in p.contents:
                 if isinstance(content, bs4.element.Tag) is True and \
-                   content.name == "span":
-                    start_concat = True
+                   content.name == "span" and \
+                   content.text == span.text:
                     continue
 
-                if start_concat is True:
-                    # for keywords in the article we manually surround them with
-                    # <b></b> tags
-                    if isinstance(content, bs4.element.Tag) is True and \
-                       content.name == "b":
-                        content = "<red>" + content.text + "</red>"
-                    elif isinstance(content, bs4.element.Tag):
-                        content = content.text.strip()
-                    else:
-                        content = content.strip()
+                # for keywords in the article we manually surround them with
+                # <b></b> tags
+                if isinstance(content, bs4.element.Tag) is True and \
+                   content.name == "b":
+                    content = "<red>" + content.text + "</red>"
+                elif isinstance(content, bs4.element.Tag):
+                    content = content.text.strip()
+                else:
+                    content = content.strip()
 
-                    if len(content) == 0:
-                        continue
+                if len(content) == 0:
+                    continue
 
-                    # Then use space to separate the contents
-                    meaning += (content + " ")
+                # Then use space to separate the contents
+                meaning += (content + " ")
 
             # If we did not find anything then return
-            if start_concat is False or \
-               len(meaning) == 0:
-                dbg_printf("Did not find the <span> in the meaning of the word")
+            if len(meaning) == 0:
+                dbg_printf("Did not find the meaning of the word in the <p> under main div (index = %d)",
+                           li_count)
                 return None
 
             # Save the meaning of the word as the text
