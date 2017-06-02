@@ -389,7 +389,8 @@ def add_to_cache(word, d):
     # -1 means there is no limit
     if CACHE_MAX_ENTRY != -1:
         ret = trim_cache(cache_dir, CACHE_MAX_ENTRY)
-        dbg_printf("Deleted %d file(s) from the cache", ret)
+        if ret > 0:
+            dbg_printf("Deleted %d file(s) from the cache", ret)
 
     # This is the word file
     word_file = os.path.join(cache_dir, "%s.json" % (word, ))
@@ -605,10 +606,24 @@ def uninstall():
 
     return
 
-# The first argument can be one of these without invoking unknown
-# word/command error; These commands are designated with certain management
-# tasks and do not query the dictionary
-CONTROL_COMMAND_SET = set(["--install", "--uninstall", "--cd"])
+def cmd_trim_cache():
+    """
+    This function processes the command line argument --trim-cache, and internally
+    calls trim_cache() to randomly delete entries from the cache
+    
+    :return: None 
+    """
+    if len(sys.argv) == 2:
+        pass
+
+# This dict object maps the argument from keyword to the maximum number
+# of arguments (incl. optional arguments)
+CONTROL_COMMAND_DICT = {
+    "--install": 1,
+    "--uninstall": 0,
+    "--cd": 0,
+    "--clear-cache": 1
+}
 
 def process_args():
     """
@@ -626,13 +641,29 @@ def process_args():
         sys.exit(0)
 
     # In case the user put an option before the word
-    if len(sys.argv) >= 2 and \
-       sys.argv[1][0] == "-" and \
-       sys.argv[1] not in CONTROL_COMMAND_SET:
+    if sys.argv[1][0] == "-" and \
+       sys.argv[1] not in CONTROL_COMMAND_DICT:
         print(USAGE_STRING)
         sys.exit(0)
 
+    # This is the index of the argv item we are currently on
+    argv_index = -1
     for arg in sys.argv:
+        argv_index += 1
+
+        # Control commands must be the first argument;
+        # Otherwise error
+        optional_arg_num = CONTROL_COMMAND_DICT.get(arg, None)
+        if optional_arg_num is not None:
+            if argv_index != 1:
+                print("Please use control command \"%s\" always as the first argument" %
+                      (arg, ))
+                sys.exit(1)
+            elif len(sys.argv) != (optional_arg_num + 2):
+                print("Please use control command \"%s\" with correct argument (expecting %d)" %
+                      (arg, optional_arg_num, ))
+                sys.exit(1)
+
         if arg == "-v" or arg == "--verbose":
             verbose_flag = True
         elif arg == "-m5":
@@ -650,6 +681,10 @@ def process_args():
             # This command will print absolute directory of this file
             # and then exit
             print(get_file_dir())
+            sys.exit(0)
+        elif arg == "--trim-cache":
+            # This processes the cmd line argument
+            cmd_trim_cache()
             sys.exit(0)
         elif arg == "--debug":
             debug_flag = True
@@ -685,6 +720,11 @@ The following is used without specifying the [word]
 --uninstall       Uninstall the "define" utility. This removes the first "define"
                   utility that appears under PATH
 --cd              Print the directory of this file
+
+--trim-cache [#]  Remove cache contents until there are [#] of entry/-ies left
+                  The number must be an integer greater than or equal to 0
+                  Default value is 0, which means deleting all contents from 
+                  the cache
 """
 verbose_flag = False
 m5_flag = False
