@@ -175,9 +175,22 @@ def get_collins_dict(tree):
                 return None
 
             span = p.find("span")
+            # This is possible if this entry is simply a redirection
             if span is None:
-                #dbg_printf("Did not find the <span> under the <p> under the main <div> (index = %d)",
-                #           li_count)
+                # Make it invisible
+                d["category"] = ""
+
+                # Quick path: No examples, and just concatenates everything inside the
+                # <p> tag
+                meaning = ""
+                for content in p.contents:
+                    if isinstance(content, bs4.element.Tag) is True:
+                        meaning += (content.contents.strip() + " ")
+                    else:
+                        meaning += (content.strip() + " ")
+                d["text"] = meaning
+                d["examples"] = []
+
                 continue
 
             # Save the category as category attribute
