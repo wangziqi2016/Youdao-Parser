@@ -237,8 +237,11 @@ def get_collins_dict(tree):
                     if isinstance(content, bs4.element.Tag) is True and \
                        content.name == "b":
                         content = "<red>" + content.text + "</red>"
+                    elif isinstance(content, bs4.element.Tag):
+                        content = content.text.strip()
+                    else:
+                        content = content.strip()
 
-                    content = content.strip()
                     if len(content) == 0:
                         continue
 
@@ -300,7 +303,7 @@ def get_cache_file_list(path):
     
     :return: int, as the number of json files 
     """
-    return glob.glob(os.join(path, "*.json"))
+    return glob.glob(os.path.join(path, "*.json"))
 
 # The name of the directory under the file directory as the word cache
 CACHE_DIRECTORY = "cache"
@@ -325,13 +328,13 @@ def trim_cache(cache_dir, limit):
     current_cache_size = len(cache_file_list)
 
     deleted_count = 0
-    if current_cache_size > limit:
+    if current_cache_size >= limit:
         # This is the number of files we need to delete
-        delta = current_cache_size - limit
+        delta = current_cache_size - limit + 1
         # Then do a permutation of the list and pick the first
         # "deleted_count" elements to delete
         for i in range(0, delta):
-            exchange_index = randint(0, current_cache_size)
+            exchange_index = randint(0, current_cache_size - 1)
             # Then exchange the elements
             t = cache_file_list[exchange_index]
             cache_file_list[exchange_index] = cache_file_list[i]
@@ -376,7 +379,7 @@ def add_to_cache(word, d):
     # -1 means there is no limit
     if CACHE_MAX_ENTRY != -1:
         ret = trim_cache(cache_dir, CACHE_MAX_ENTRY)
-        dbg_printf("Deleted %d files from the cache", ret)
+        dbg_printf("Deleted %d file(s) from the cache", ret)
 
     # This is the word file
     word_file = os.path.join(cache_dir, "%s.json" % (word, ))
