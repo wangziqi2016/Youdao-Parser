@@ -7,6 +7,7 @@ import os
 import json
 import stat
 import inspect
+from random import randint
 
 def dbg_printf(format, *args):
     """
@@ -289,7 +290,37 @@ def get_collins_dict(tree):
 
     return ret_list
 
+def get_cache_file_list(path):
+    """
+    This function counts the number of json files under a given directory.
+    To save an system call the path is given as the argument
+    
+    If the passed path is not a valid directory then the result is undefined
+    
+    :return: int, as the number of json files 
+    """
+    return glob.glob(os.join(path, "*.json"))
+
+# The name of the directory under the file directory as the word cache
 CACHE_DIRECTORY = "cache"
+
+# The max number of entries we allow for the cache
+# When we add to the cache we check this first, and if the actual number of
+# json files is greater than this we randomly delete files from the cache
+# If this is set to -1 then there is no limit
+# If this is set to 0 then cache is disabled
+CACHE_MAX_ENTRY = 10
+
+def trim_cache(path, limit):
+    """
+    Randomly remove cache content under given path until the number of file equals
+    or is less than the given limit
+    
+    :param path: Under which we store cached file
+    :param limit: The maximum number of entries allowed for the cache
+    :return: int, the number of files we deleted
+    """
+
 def add_to_cache(word, d):
     """
     This function adds a word and its associated dictionary object into the local cache
@@ -301,6 +332,10 @@ def add_to_cache(word, d):
     :param d: The dictionary object returned by the parser
     :return: None
     """
+    # If cache is disabled then return directly
+    if CACHE_MAX_ENTRY == 0:
+        return
+
     # This is the directory of the current file
     file_dir = get_file_dir()
     cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
@@ -308,6 +343,24 @@ def add_to_cache(word, d):
     # If the cache directory has not yet been created then just create it
     if os.path.isdir(cache_dir) is False:
         os.mkdir(cache_dir)
+
+    # Then before we check for the existence of the file, we
+    # check whether the cache directory is full, and if it is
+    # randomly choose one and then remove it
+    # -1 means there is no limit
+    if CACHE_MAX_ENTRY != -1:
+        cache_file_list = get_cache_file_list(cache_dir)
+        current_cache_size = len(cache_file_list)
+
+        if current_cache_size > CACHE_MAX_ENTRY:
+            # This is the number of files we need to delete
+            delta = current_cache_size - CACHE_MAX_ENTRY
+            # While we still have files to delete, loop to randomly determine
+            # whether we should delete
+            index = 0
+            while delta > 0:
+
+
 
     # This is the word file
     word_file = os.path.join(cache_dir, "%s.json" % (word, ))
