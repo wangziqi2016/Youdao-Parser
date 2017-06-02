@@ -614,7 +614,26 @@ def cmd_trim_cache():
     :return: None 
     """
     if len(sys.argv) == 2:
-        pass
+        limit = 0
+    else:
+        try:
+            # Use the third argument as the limit and try to convert it
+            # from a string to integer
+            limit = int(argv[2])
+        except ValueError:
+            print("Invalid limit \"%s\". Please specify the correct limit." %
+                  (argv[2], ))
+            sys.exit(1)
+
+    if limit < 0:
+        print("Invalid limit: %d. Please specify a positive integer" %
+              (limit, ))
+        sys.exit(1)
+
+    ret = trim_cache(os.path.join(get_file_dir(), CACHE_DIRECTORY), limit)
+    print("Deleted %d entry/-ies" % (ret, ))
+
+    return
 
 # This dict object maps the argument from keyword to the maximum number
 # of arguments (incl. optional arguments)
