@@ -122,19 +122,22 @@ def get_collins_dict(tree):
     ret_list = []
     # We set this to be the first word
     actual_key = None
+    # This is the index for <div>.wt
+    wt_index = -1
     for tree in top_level_list:
+        wt_index += 1
         # We append this into a list
         ret = {}
 
         # This <h4> contains the main word, the pronunciation
         h4 = tree.find("h4")
         if h4 is None:
-            dbg_printf("Did not find <h4>")
+            dbg_printf("Did not find <h4> (wt_index = %d)", wt_index)
             return None
 
         span_list = h4.find_all("span")
         if len(span_list) < 1:
-            dbg_printf("Did not find <span> under <h4>")
+            dbg_printf("Did not find <span> under <h4> (wt_index = %d)", wt_index)
             return None
 
         # This is the word we are looking for
@@ -143,11 +146,13 @@ def get_collins_dict(tree):
         # This contains the phonetic
         em = h4.find("em")
         if em is None:
-            dbg_printf("Did not find <em> under <h4>")
-            return None
+            # If we did not find <em> then there is no pronunciation
+            # and we just set it as empty string
+            ret["phonetic"] = ""
+        else:
+            # Save the phonetic (note: this is not ASCII)
+            ret["phonetic"] = em.text
 
-        # Save the phonetic (note: this is not ASCII)
-        ret["phonetic"] = em.text
         # Initialize the meanings list
         ret["meanings"] = []
 
