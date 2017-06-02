@@ -289,9 +289,9 @@ def add_to_cache(word, d):
 
     # This is the word file
     word_file = os.path.join(cache_dir, "%s.json" % (word, ))
-    # If the file exists then ignore it
+    # If the file exists then warning
     if os.path.isfile(word_file) is True:
-        return
+        dbg_printf("Overwriting cache file for word: %s", word)
 
     fp = open(word_file, "w")
     json.dump(d, fp)
@@ -509,6 +509,7 @@ def process_args():
     global verbose_flag
     global m5_flag
     global debug_flag
+    global force_flag
 
     if len(sys.argv) < 2:
         print(USAGE_STRING)
@@ -542,10 +543,13 @@ def process_args():
             sys.exit(0)
         elif arg == "--debug":
             debug_flag = True
+        elif arg == "--force":
+            force_flag = True
 
         dbg_printf("Debug flag: %s", debug_flag)
         dbg_printf("m5 flag: %s", m5_flag)
         dbg_printf("verbose flag: %s", verbose_flag)
+        dbg_printf("force flag: %s", force_flag)
 
     return
 
@@ -560,6 +564,7 @@ Usage: python youdao_dict.py [word] [options]
 -m5          Only Display the first 5 meaning of each word
 --debug      Shows debug message (e.g. reasons for parsing failure)
              Used for developer to debug.
+--force      Ignore cached content
 
 --install  [dir]  Install this as an utility, "define". 
                   Optional argument specifies the location. 
@@ -570,10 +575,16 @@ Usage: python youdao_dict.py [word] [options]
 verbose_flag = False
 m5_flag = False
 debug_flag = False
+force_flag = False
 
 process_args()
 query_word = sys.argv[1]
-meaning_dict_list = check_in_cache(query_word)
+
+# If it is None after checking the cache then we send HTTP
+meaning_dict_list = None
+if force_flag is False:
+    check_in_cache(query_word)
+
 if meaning_dict_list is None:
     collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(query_word))))
 else:
