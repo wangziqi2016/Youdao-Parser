@@ -375,6 +375,11 @@ def add_to_cache(word, d):
     if CACHE_MAX_ENTRY == 0:
         return
 
+    # Also take care of this
+    if no_add_flag is True:
+        dbg_printf("no_add_flag is on; do not add to cache")
+        return
+
     # This is the directory of the current file
     file_dir = get_file_dir()
     cache_dir = os.path.join(file_dir, CACHE_DIRECTORY)
@@ -670,6 +675,7 @@ def process_args():
     global m5_flag
     global debug_flag
     global force_flag
+    global no_add_flag
 
     if len(sys.argv) < 2:
         print(USAGE_STRING)
@@ -728,11 +734,14 @@ def process_args():
             debug_flag = True
         elif arg == "--force":
             force_flag = True
+        elif arg == "--no-add":
+            no_add_flag = True
 
     dbg_printf("Debug flag: %s", debug_flag)
     dbg_printf("m5 flag: %s", m5_flag)
     dbg_printf("verbose flag: %s", verbose_flag)
     dbg_printf("force flag: %s", force_flag)
+    dbg_printf("no add flag: %s", no_add_flag)
 
     return
 
@@ -750,6 +759,7 @@ The following must be used with [word] being the first argument
 --debug      Shows debug message (e.g. reasons for parsing failure)
              Used for developer to debug.
 --force      Ignore cached content
+--no-add     Do not add the word into the cache under all circumstances
 
 The following is used without specifying the [word]
 
@@ -769,6 +779,7 @@ verbose_flag = False
 m5_flag = False
 debug_flag = False
 force_flag = False
+no_add_flag = False
 
 process_args()
 query_word = sys.argv[1]
