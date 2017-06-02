@@ -337,6 +337,8 @@ def check_in_cache(word):
 
 RED_TEXT_START = "\033[1;31m"
 RED_TEXT_END = "\033[0m"
+GREEN_TEXT_START = "\033[1;32m"
+GREEN_TEXT_END = "\033[0m"
 def print_red(text):
     """
     Prints the given text in read fore color
@@ -347,6 +349,21 @@ def print_red(text):
     sys.stdout.write(RED_TEXT_START)
     sys.stdout.write(text)
     sys.stdout.write(RED_TEXT_END)
+
+def process_color(s):
+    """
+    Replace color marks in a string with actual color control characters defined
+    by the terminal
+    
+    :param s: The input string
+    :return: str
+    """
+    s = s.replace("<red>", RED_TEXT_START)
+    s = s.replace("</red>", RED_TEXT_END)
+    s = s.replace("<green>", GREEN_TEXT_START)
+    s = s.replace("</green>", GREEN_TEXT_START)
+
+    return s
 
 def collins_pretty_print(dict_list):
     """
@@ -375,9 +392,7 @@ def collins_pretty_print(dict_list):
             sys.stdout.write("%d. (%s) " % (counter, meaning["category"]))
             counter += 1
 
-            text = meaning["text"]
-            text = text.replace("<b>", RED_TEXT_START)
-            text = text.replace("</b>", RED_TEXT_END)
+            text = process_color(meaning["text"])
             sys.stdout.write(text)
 
             sys.stdout.write("\n")
