@@ -425,12 +425,14 @@ def check_in_cache(word):
 
     # If the cache directory has not yet been created then just create it
     if os.path.isdir(cache_dir) is False:
+        dbg_printf("Cache directory not valid: %s", cache_dir)
         return None
 
     # This is the word file
-    word_file = os.path.join(cache_dir, "%s.json" % (word,))
+    word_file = os.path.join(cache_dir, "%s.json" % (word, ))
     # If the file exists then ignore it
     if os.path.isfile(word_file) is False:
+        dbg_printf("File %s is not valid cached word file", word_file)
         return None
 
     fp = open(word_file, "r")
@@ -445,6 +447,7 @@ def check_in_cache(word):
         return None
 
     fp.close()
+
     return d
 
 RED_TEXT_START = "\033[1;31m"
@@ -787,9 +790,10 @@ query_word = sys.argv[1]
 # If it is None after checking the cache then we send HTTP
 meaning_dict_list = None
 if force_flag is False:
-    check_in_cache(query_word)
+    meaning_dict_list = check_in_cache(query_word)
 
 if meaning_dict_list is None:
     collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(query_word))))
 else:
+    dbg_printf("Serving word \"%s\" from the cache", query_word)
     collins_pretty_print(meaning_dict_list)
