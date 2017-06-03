@@ -217,12 +217,16 @@ def get_collins_dict(tree):
                 meaning = ""
                 for content in p.contents:
                     if isinstance(content, bs4.element.Tag) is True:
-                        if content.name == "b":
-                            meaning += ("<red>" + " ".join(content.text.split()) + "</red> ")
+                        if content.name == "a":
+                            meaning += ("<green>" + " ".join(content.text.split()) + "</green>")
+                        elif content.name == "b":
+                            meaning += ("<red>" + " ".join(content.text.split()) + "</red>")
                         else:
                             meaning += " ".join(content.text.split())
                     else:
                         meaning += " ".join(content.split())
+
+                    meaning += " "
 
                 d["text"] = meaning
                 d["examples"] = []
