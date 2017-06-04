@@ -6,12 +6,13 @@ Parses YouDao online dictionary's result and display them on the terminal in a p
 
     The following must be used with [word] being the first argument
 
-    -v/--verbose Also show examples
-    -m5          Only Display the first 5 meaning of each word
-    --debug      Shows debug message (e.g. reasons for parsing failure)
-                 Used for developer to debug.
-    --force      Ignore cached content
-    --no-add     Do not add the word into the cache under all circumstances
+    -v/--verbose    Also show examples
+    -g/--word-group Also show word group and their meanings
+    -m5             Only Display the first 5 meaning of each word
+    --debug         Shows debug message (e.g. reasons for parsing failure)
+                    Used for developer to debug.
+    --force         Ignore cached content
+    --no-add        Do not add the word into the cache under all circumstances
 
     The following is used without specifying the [word]
 
