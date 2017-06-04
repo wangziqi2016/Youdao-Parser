@@ -99,7 +99,13 @@ def get_collins_dict(tree):
             },
           ]
         }, ...
-      ]
+      ],
+      "word-group": [
+        {
+          "text": "Word group text",
+          "meaning": "The meaning of the word group"
+        }, ...
+      ],
     }
     
     :param tree: The beautiful soup tree
@@ -124,13 +130,13 @@ def get_collins_dict(tree):
     actual_key = None
     # This is the index for <div>.wt
     wt_index = -1
-    for tree in top_level_list:
+    for sub_tree in top_level_list:
         wt_index += 1
         # We append this into a list
         ret = {}
 
         # This <h4> contains the main word, the pronunciation
-        h4 = tree.find("h4")
+        h4 = sub_tree.find("h4")
         if h4 is None:
             dbg_printf("Did not find <h4> (wt_index = %d)", wt_index)
             return None
@@ -178,7 +184,7 @@ def get_collins_dict(tree):
             ret["frequency"] = freq
 
         # This is all meanings
-        li_list = tree.find_all("li")
+        li_list = sub_tree.find_all("li")
         li_count = -1
         for li in li_list:
             li_count += 1
@@ -292,7 +298,22 @@ def get_collins_dict(tree):
             # the changes will not be committed
             ret["meanings"].append(d)
 
-        # Set the actual key on the webpage
+        # Then add word groups
+        word_group_list = []
+        ret["word-group"] = word_group_list
+
+        #
+        # Then start to extract word groups
+        #
+
+        word_group_div_list = tree.select("#wordGroup")
+        if len(word_group_div_list) == 0:
+            dbg_printf("Did not find word group; return empty word group")
+        else:
+            word_group_div = word_group_div_list[0]
+            
+
+        # Set the actual key on the web page
         if actual_key is None:
             actual_key = ret["word"]
 
@@ -763,12 +784,13 @@ Usage (after installation): define [word] [--options]
 
 The following must be used with [word] being the first argument
 
--v/--verbose Also show examples
--m5          Only Display the first 5 meaning of each word
---debug      Shows debug message (e.g. reasons for parsing failure)
-             Used for developer to debug.
---force      Ignore cached content
---no-add     Do not add the word into the cache under all circumstances
+-v/--verbose    Also show examples
+-g/--word-group Also show word group and their meanings
+-m5             Only Display the first 5 meaning of each word
+--debug         Shows debug message (e.g. reasons for parsing failure)
+                Used for developer to debug.
+--force         Ignore cached content
+--no-add        Do not add the word into the cache under all circumstances
 
 The following is used without specifying the [word]
 
@@ -786,6 +808,7 @@ The following is used without specifying the [word]
 --ls-cache        List words in the cache. One word each line
 """
 verbose_flag = False
+word_group_flag = False
 m5_flag = False
 debug_flag = False
 force_flag = False
