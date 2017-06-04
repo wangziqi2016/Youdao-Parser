@@ -508,6 +508,9 @@ RED_TEXT_START = "\033[1;31m"
 RED_TEXT_END = "\033[0m"
 GREEN_TEXT_START = "\033[1;32m"
 GREEN_TEXT_END = "\033[0m"
+YELLOW_TEXT_START = "\033[1;33m"
+YELLOW_TEXT_END = "\033[0m"
+
 def print_red(text):
     """
     Prints the given text in read fore color
@@ -518,6 +521,19 @@ def print_red(text):
     sys.stdout.write(RED_TEXT_START)
     sys.stdout.write(text)
     sys.stdout.write(RED_TEXT_END)
+    return
+
+def print_yellow(text):
+    """
+    Prints the text in yellow foreground color
+    
+    :param text: The text to be printed 
+    :return: None
+    """
+    sys.stdout.write(YELLOW_TEXT_START)
+    sys.stdout.write(text)
+    sys.stdout.write(YELLOW_TEXT_END)
+    return
 
 def process_color(s):
     """
@@ -585,7 +601,7 @@ def collins_pretty_print(dict_list):
         if word_group_flag is True:
             sys.stdout.write("\n")
             for word_group in d["word-group"]:
-                print_red(word_group["text"])
+                print_yellow(word_group["text"])
                 sys.stdout.write(" " + word_group["meaning"] + "\n")
 
     return
