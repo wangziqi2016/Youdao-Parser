@@ -298,20 +298,49 @@ def get_collins_dict(tree):
             # the changes will not be committed
             ret["meanings"].append(d)
 
-        # Then add word groups
-        word_group_list = []
-        ret["word-group"] = word_group_list
-
         #
         # Then start to extract word groups
         #
+
+        word_group_list = []
+        ret["word-group"] = word_group_list
 
         word_group_div_list = tree.select("#wordGroup")
         if len(word_group_div_list) == 0:
             dbg_printf("Did not find word group; return empty word group")
         else:
             word_group_div = word_group_div_list[0]
-            
+            # This is a list of <p> tags that contains the word group
+            word_group_p_list = word_group_div.select("p.wordGroup")
+            word_group_index = -1
+            for word_group_p in word_group_p_list:
+                word_group_index += 1
+                # Search for the <a> tag that contains the text of the word group
+                a_list = word_group_p.select("a.search-js")
+                if len(a_list) == 0:
+                    dbg_printf("Did not find word group text (index = %d)",
+                               word_group_index)
+                    continue
+
+                text = a_list[0].text
+                meaning = ""
+                for content in word_group_p.contents:
+                    if isinstance(content, bs4.element.Tag) is True:
+                       continue
+
+                    meaning += (" ".join(content.split()) + " ")
+
+                meaning = meaning.strip()
+                if len(meaning) == 0:
+                    dbg_printf("Did not find word group meaning (index = %d)",
+                               word_group_index)
+                    continue
+
+                # Finally add an element into the word group list
+                word_group_list.append(
+                    {"text": text,
+                     "meaning": meaning}
+                )
 
         # Set the actual key on the web page
         if actual_key is None:
