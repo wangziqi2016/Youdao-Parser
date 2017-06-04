@@ -581,7 +581,12 @@ def collins_pretty_print(dict_list):
                     sys.stdout.write(example["translation"])
                     sys.stdout.write("\n")
 
-        sys.stdout.write("\n")
+        # If we also print word group then print it
+        if word_group_flag is True:
+            sys.stdout.write("\n")
+            for word_group in d["word-group"]:
+                print_red(word_group["text"])
+                sys.stdout.write(" " + word_group["meaning"] + "\n")
 
     return
 
@@ -735,6 +740,7 @@ def process_args():
     global debug_flag
     global force_flag
     global no_add_flag
+    global word_group_flag
 
     if len(sys.argv) < 2:
         print(USAGE_STRING)
@@ -795,12 +801,15 @@ def process_args():
             force_flag = True
         elif arg == "--no-add":
             no_add_flag = True
+        elif arg == "-g" or arg == "--word-group":
+            word_group_flag = True
 
     dbg_printf("Debug flag: %s", debug_flag)
     dbg_printf("m5 flag: %s", m5_flag)
     dbg_printf("verbose flag: %s", verbose_flag)
     dbg_printf("force flag: %s", force_flag)
     dbg_printf("no add flag: %s", no_add_flag)
+    dbg_printf("word group flag: %s", word_group_flag)
 
     return
 
