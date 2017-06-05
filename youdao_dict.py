@@ -616,18 +616,31 @@ def get_file_dir():
 
 DEFAULT_INSTALL_DIR = "/usr/local/bin"
 INSTALL_FILE_NAME = "define"
+# This is the file we keep under the same directory as the file
+# to record the path that the utility has been installed
+PATH_FILE_NAME = "INSTALL_PATH"
 def install():
     """
-    Installs a shortcut as "define" command for the current user using the pwd
+    Installs a shortcut as "define" command for the current user. This function
+    will write a file under the directory of this script for delete to work.
     
     :return: None 
     """
+    # First check whether the file already exists as a flag to
+    # indicate previous installation
+    #current_path = get_file_dir()
+    #path_file_path = os.path.join()
+
     # If there are extra arguments then we use the one after --install command
     # as the path to which we install
     if len(sys.argv) > 2:
-        install_dir = sys.argv[2]
+        # Need to expand the user and variables like a shell
+        install_dir = os.path.expandvars(os.path.expanduser(sys.argv[2]))
     else:
         install_dir = DEFAULT_INSTALL_DIR
+
+    # Then make it an absolute path
+    install_dir = os.path.abspath(install_dir)
 
     # Check whether we have permission to this directory
     if os.access(install_dir, os.W_OK) is False:
