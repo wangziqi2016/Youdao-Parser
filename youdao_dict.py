@@ -721,8 +721,8 @@ def install():
 
 def uninstall():
     """
-    This function uninstalls the "define" utility. We search the PATH variable
-    and delete the first file that occurs under the path
+    This function uninstalls the "define" utility. We use the path file to
+    find the location we have previously installed the utility
     
     :return: None 
     """
@@ -814,6 +814,32 @@ def cmd_ls_cache():
 
     return
 
+def cmd_ls_define():
+    """
+    This function prints the current directory we install the utility
+    If the utility is not installed or if the installation is invalid nothing is printed.
+     
+    :return: None 
+    """
+    path_file_path = get_path_file_path()
+    if os.path.isfile(path_file_path) is False:
+        return
+
+    # This is the location where we install the utility
+    fp = open(path_file_path, "r")
+    line = fp.read()
+    fp.close()
+
+    # If the installation is invalid also return
+    if os.path.isfile(line) is False:
+        return
+
+    print(line)
+
+    return
+
+
+
 # This dict object maps the argument from keyword to the maximum number
 # of arguments (incl. optional arguments)
 CONTROL_COMMAND_DICT = {
@@ -823,7 +849,8 @@ CONTROL_COMMAND_DICT = {
     "--trim-cache": 1,
     "--ls-cache": 0,
     "--help": 0,
-    "-h": 0
+    "-h": 0,
+    "--ls-define": 0,
 }
 
 def process_args():
@@ -892,6 +919,9 @@ def process_args():
         elif arg == "--ls-cache":
             cmd_ls_cache()
             sys.exit(0)
+        elif arg == "--ls-define":
+            cmd_ls_define()
+            sys.exit(0)
         elif arg == "--debug":
             debug_flag = True
         elif arg == "--force":
@@ -941,6 +971,7 @@ The following is used without specifying the [word]
                   Default value is 0, which means deleting all contents from 
                   the cache
 --ls-cache        List words in the cache. One word each line
+--ls-define       Print the path under which the utility is installed
 """
 verbose_flag = False
 word_group_flag = False
