@@ -614,11 +614,25 @@ def get_file_dir():
     """
     return os.path.dirname(os.path.abspath(__file__))
 
-DEFAULT_INSTALL_DIR = "/usr/local/bin"
-INSTALL_FILE_NAME = "define"
 # This is the file we keep under the same directory as the file
 # to record the path that the utility has been installed
 PATH_FILE_NAME = "INSTALL_PATH"
+def get_path_file_path():
+    """
+    This function opens the path file path (the file that records the installation path)
+    
+    :return: str
+    """
+    # First check whether the file already exists as a flag to
+    # indicate previous installation
+    current_path = get_file_dir()
+    # This is the abs path for the flag
+    path_file_path = os.path.join(current_path, PATH_FILE_NAME)
+    return path_file_path
+
+DEFAULT_INSTALL_DIR = "/usr/local/bin"
+INSTALL_FILE_NAME = "define"
+
 def install():
     """
     Installs a shortcut as "define" command for the current user. This function
@@ -626,11 +640,9 @@ def install():
     
     :return: None 
     """
-    # First check whether the file already exists as a flag to
-    # indicate previous installation
-    current_path = get_file_dir()
-    # This is the abs path for the flag
-    path_file_path = os.path.join(current_path, PATH_FILE_NAME)
+    # This is the path in which the installation information is stored
+    path_file_path = get_path_file_path()
+
     # Check if it is a directory then something is wrong and installation
     # could not proceed
     if os.path.isdir(path_file_path) is True:
