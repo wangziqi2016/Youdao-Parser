@@ -628,8 +628,34 @@ def install():
     """
     # First check whether the file already exists as a flag to
     # indicate previous installation
-    #current_path = get_file_dir()
-    #path_file_path = os.path.join()
+    current_path = get_file_dir()
+    # This is the abs path for the flag
+    path_file_path = os.path.join(current_path, PATH_FILE_NAME)
+    # Check if it is a directory then something is wrong and installation
+    # could not proceed
+    if os.path.isdir(path_file_path) is True:
+        print("Path %s could not be a directory - installation fail" %
+              (path_file_path, ))
+        sys.exit(1)
+    elif os.path.isfile(path_file_path) is True:
+        # Otherwise just read the file and check whether the path
+        # is still valid
+        fp = open(path_file_path, "r")
+        line = fp.read()
+        fp.close()
+
+        # If there is a previous installation then prompt the user to
+        # uninstall it first
+        if os.path.isfile(line) is True:
+            print("Found a previous installation in %s. Please run --uninstall first" %
+                  (line, ))
+            sys.exit(1)
+        else:
+            print("Found an invalid installation in %s. Please manually delete it first" %
+                  (line, ))
+            sys.exit(1)
+        
+
 
     # If there are extra arguments then we use the one after --install command
     # as the path to which we install
