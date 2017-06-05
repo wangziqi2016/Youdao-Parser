@@ -101,3 +101,5 @@ ENV/
 .mypy_cache/
 
 cache/
+# This is the file we record installation path
+INSTALL_PATH
