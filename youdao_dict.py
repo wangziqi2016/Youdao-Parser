@@ -638,7 +638,7 @@ def install():
     Installs a shortcut as "define" command for the current user. This function
     will write a file under the directory of this script for delete to work.
     
-    :return: None 
+    :return: int; 0 if success; Otherwise fail 
     """
     # This is the path in which the installation information is stored
     path_file_path = get_path_file_path()
@@ -648,7 +648,7 @@ def install():
     if os.path.isdir(path_file_path) is True:
         print("Path %s could not be a directory - installation fail" %
               (path_file_path, ))
-        return
+        return 1
     elif os.path.isfile(path_file_path) is True:
         # Otherwise just read the file and check whether the path
         # is still valid
@@ -665,7 +665,7 @@ def install():
             print("Found an invalid installation in %s. Please manually delete it first" %
                   (line, ))
 
-        return
+        return 1
 
     # If there are extra arguments then we use the one after --install command
     # as the path to which we install
@@ -682,12 +682,12 @@ def install():
     if os.access(install_dir, os.W_OK) is False:
         print("Access to \"%s\" denied. Please try sudo" %
               (install_dir, ))
-        return
+        return 1
 
     if os.path.isdir(install_dir) is False:
         print("Install path %s is invalid. Please choose a valid one" %
               (install_dir, ))
-        return
+        return 1
 
     # Join these two as the path of the file we write into
     install_file_path = os.path.join(install_dir, INSTALL_FILE_NAME)
@@ -699,7 +699,7 @@ def install():
     if os.path.isfile(install_file_path) is True:
         print("There is already a \"define\" at location %s; please check whether it is a name conflict" %
               (install_file_path, ))
-        return
+        return 1
 
     # Get the absolute path of this file and write a bash script
     current_file = os.path.abspath(__file__)
@@ -717,24 +717,24 @@ def install():
 
     print("Install successful")
 
-    return
+    return 0
 
 def uninstall():
     """
     This function uninstalls the "define" utility. We use the path file to
     find the location we have previously installed the utility
     
-    :return: None 
+    :return: int 
     """
     # This is the path to the path file
     path_file_path = get_path_file_path()
     if os.path.isdir(path_file_path) is True:
         print("Path %s could not be a directory - please manually delete it" %
               (path_file_path, ))
-        return
+        return 1
     elif os.path.isfile(path_file_path) is False:
         print("Did not find a previous installation. To install please run with --install option")
-        return
+        return 1
 
     # Open the file, read the first line and delete the utility
     fp = open(path_file_path, "r")
@@ -746,7 +746,7 @@ def uninstall():
     if os.path.isfile(line) is False:
         print("Found an invalid installation in %s. Please manually delete %s" %
               (line, INSTALL_FILE_NAME, ))
-        return
+        return 1
 
     # This is the installation directory
     install_dir = os.path.dirname(line)
@@ -754,10 +754,11 @@ def uninstall():
     if os.access(install_dir, os.W_OK) is False:
         print("Access to \"%s\" denied. Please try sudo" %
               (install_dir, ))
-        return
+        return 1
 
     # Try to remove the file and catch any exception thrown
     # by the routine
+    current_file = None
     try:
         current_file = line
         os.unlink(current_file)
@@ -766,11 +767,11 @@ def uninstall():
     except OSError:
         print("Fail to remove file: %s" %
               (current_file, ))
-        return
+        return 1
 
     print("Uninstall successful")
 
-    return
+    return 0
 
 def cmd_trim_cache():
     """
@@ -789,17 +790,17 @@ def cmd_trim_cache():
         except ValueError:
             print("Invalid limit \"%s\". Please specify the correct limit." %
                   (sys.argv[2], ))
-            sys.exit(1)
+            return 1
 
     if limit < 0:
         print("Invalid limit: %d. Please specify a positive integer" %
               (limit, ))
-        sys.exit(1)
+        return 1
 
     ret = trim_cache(os.path.join(get_file_dir(), CACHE_DIRECTORY), limit)
     print("Deleted %d entry/-ies" % (ret, ))
 
-    return
+    return 0
 
 def cmd_ls_cache():
     """
@@ -812,7 +813,7 @@ def cmd_ls_cache():
         base_name = os.path.splitext(os.path.basename(name))[0]
         print(base_name)
 
-    return
+    return 0
 
 def cmd_ls_define():
     """
@@ -823,7 +824,7 @@ def cmd_ls_define():
     """
     path_file_path = get_path_file_path()
     if os.path.isfile(path_file_path) is False:
-        return
+        return 1
 
     # This is the location where we install the utility
     fp = open(path_file_path, "r")
@@ -832,13 +833,11 @@ def cmd_ls_define():
 
     # If the installation is invalid also return
     if os.path.isfile(line) is False:
-        return
+        return 1
 
     print(line)
 
-    return
-
-
+    return 0
 
 # This dict object maps the argument from keyword to the maximum number
 # of arguments (incl. optional arguments)
@@ -902,11 +901,11 @@ def process_args():
             print(USAGE_STRING)
             sys.exit(0)
         elif arg == "--install":
-            install()
-            sys.exit(0)
+            ret = install()
+            sys.exit(ret)
         elif arg == "--uninstall":
-            uninstall()
-            sys.exit(0)
+            ret = uninstall()
+            sys.exit(ret)
         elif arg == "--ls-dir":
             # This command will print absolute directory of this file
             # and then exit
@@ -914,14 +913,14 @@ def process_args():
             sys.exit(0)
         elif arg == "--trim-cache":
             # This processes the cmd line argument
-            cmd_trim_cache()
-            sys.exit(0)
+            ret = cmd_trim_cache()
+            sys.exit(ret)
         elif arg == "--ls-cache":
-            cmd_ls_cache()
-            sys.exit(0)
+            ret = cmd_ls_cache()
+            sys.exit(ret)
         elif arg == "--ls-define":
-            cmd_ls_define()
-            sys.exit(0)
+            ret = cmd_ls_define()
+            sys.exit(ret)
         elif arg == "--debug":
             debug_flag = True
         elif arg == "--force":
