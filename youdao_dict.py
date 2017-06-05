@@ -636,7 +636,7 @@ def install():
     if os.path.isdir(path_file_path) is True:
         print("Path %s could not be a directory - installation fail" %
               (path_file_path, ))
-        sys.exit(1)
+        return
     elif os.path.isfile(path_file_path) is True:
         # Otherwise just read the file and check whether the path
         # is still valid
@@ -649,13 +649,11 @@ def install():
         if os.path.isfile(line) is True:
             print("Found a previous installation in %s. Please run --uninstall first" %
                   (line, ))
-            sys.exit(1)
         else:
             print("Found an invalid installation in %s. Please manually delete it first" %
                   (line, ))
-            sys.exit(1)
-        
 
+        return
 
     # If there are extra arguments then we use the one after --install command
     # as the path to which we install
@@ -677,13 +675,18 @@ def install():
     if os.path.isdir(install_dir) is False:
         print("Install path %s is invalid. Please choose a valid one" %
               (install_dir, ))
+        return
 
     # Join these two as the path of the file we write into
     install_file_path = os.path.join(install_dir, INSTALL_FILE_NAME)
 
-    # Check whether we have already installed the file
+    # Check whether there is already an utility with the same name
+    # Since we already checked installation of this utility before
+    # then this should be a name conflict rather than another
+    # installation
     if os.path.isfile(install_file_path) is True:
-        print("You have already installed at location %s" % (install_file_path, ))
+        print("There is already a \"define\" at location %s; please check whether it is a name conflict" %
+              (install_file_path, ))
         return
 
     # Get the absolute path of this file and write a bash script
@@ -695,6 +698,10 @@ def install():
 
     # Also usable by other users
     os.chmod(install_file_path, stat.S_IRWXO | stat.S_IRWXG | stat.S_IRWXU)
+
+    fp = open(path_file_path, "w")
+    fp.write(install_file_path)
+    fp.close()
 
     print("Install successful")
 
