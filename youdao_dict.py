@@ -818,7 +818,7 @@ def cmd_ls_define():
     """
     This function prints the current directory we install the utility
     If the utility is not installed or if the installation is invalid nothing is printed.
-     
+    
     :return: None 
     """
     path_file_path = get_path_file_path()
@@ -845,7 +845,7 @@ def cmd_ls_define():
 CONTROL_COMMAND_DICT = {
     "--install": 1,
     "--uninstall": 0,
-    "--cd": 0,
+    "--ls-dir": 0,
     "--trim-cache": 1,
     "--ls-cache": 0,
     "--help": 0,
@@ -907,7 +907,7 @@ def process_args():
         elif arg == "--uninstall":
             uninstall()
             sys.exit(0)
-        elif arg == "--cd":
+        elif arg == "--ls-dir":
             # This command will print absolute directory of this file
             # and then exit
             print(get_file_dir())
@@ -964,14 +964,14 @@ The following is used without specifying the [word]
                   Optional argument specifies the location. 
 --uninstall       Uninstall the "define" utility. This removes the first "define"
                   utility that appears under PATH
---cd              Print the directory of this file
 
 --trim-cache [#]  Remove cache contents until there are [#] of entry/-ies left
                   The number must be an integer greater than or equal to 0
                   Default value is 0, which means deleting all contents from 
                   the cache
 --ls-cache        List words in the cache. One word each line
---ls-define       Print the path under which the utility is installed
+--ls-define       Print the absolute file name of the utility
+--ls-dir          Print the directory of this file
 """
 verbose_flag = False
 word_group_flag = False
