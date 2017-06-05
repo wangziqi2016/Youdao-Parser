@@ -726,26 +726,46 @@ def uninstall():
     
     :return: None 
     """
-    # This is a list of paths that the system will search
-    # if a name without directory is executed
-    path_list = os.environ.get('PATH').split(os.pathsep)
-    for path in path_list:
-        # This is the absolute path to the file that we install
-        define_file_path = os.path.join(path, INSTALL_FILE_NAME)
+    # This is the path to the path file
+    path_file_path = get_path_file_path()
+    if os.path.isdir(path_file_path) is True:
+        print("Path %s could not be a directory - please manually delete it" %
+              (path_file_path, ))
+        return
+    elif os.path.isfile(path_file_path) is False:
+        print("Did not find a previous installation. To install please run with --install option")
+        return
 
-        # Find the first file that appears and remove it
-        if os.path.isfile(define_file_path) is True:
-            if os.access(path, os.W_OK) is False:
-                print("Access to \"%s\" denied. Please try sudo" %
-                      (path, ))
-                return
+    # Open the file, read the first line and delete the utility
+    fp = open(path_file_path, "r")
+    line = fp.read()
+    fp.close()
 
-            os.unlink(define_file_path)
-            print("Uninstall successful (%s)" %
-                  (define_file_path, ))
-            break
-    else:
-        print("Did not find the utility - have you previously installed?")
+    # If the path recorded in the file is invalid then prompt the user to manually
+    # remove it
+    if os.path.isfile(line) is False:
+        print("Found an invalid installation in %s. Please manually delete %s" %
+              (line, INSTALL_FILE_NAME, ))
+        return
+
+    # This is the installation directory
+    install_dir = os.path.dirname(line)
+    # Then check for permissions of the containing directory
+    if os.access(install_dir, os.W_OK) is False:
+        print("Access to \"%s\" denied. Please try sudo" %
+              (install_dir, ))
+        return
+
+    # Try to remove the file and catch any exception thrown
+    # by the routine
+    try:
+        os.unlink(line)
+    except OSError:
+        print("Fail to remove file: %s" %
+              (line, ))
+        return
+
+    print("Uninstall successful")
 
     return
 
