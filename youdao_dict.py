@@ -759,10 +759,13 @@ def uninstall():
     # Try to remove the file and catch any exception thrown
     # by the routine
     try:
-        os.unlink(line)
+        current_file = line
+        os.unlink(current_file)
+        current_file = path_file_path
+        os.unlink(current_file)
     except OSError:
         print("Fail to remove file: %s" %
-              (line, ))
+              (current_file, ))
         return
 
     print("Uninstall successful")
