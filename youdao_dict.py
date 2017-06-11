@@ -839,8 +839,24 @@ def cmd_ls_define():
 
     return 0
 
+#####################################################################
+# The following implements interactive mode
+#####################################################################
+
+def interactive_mode():
+    """
+    This function initializes interactive mode and functions as the dispatching
+    engine for the event driven curses library
+    
+    It only exists when the mode is exited
+    
+    :return: None
+    """
+    return
+
 # This dict object maps the argument from keyword to the maximum number
 # of arguments (incl. optional arguments)
+# This is only used with options that do not carry words
 CONTROL_COMMAND_DICT = {
     "--install": 1,
     "--uninstall": 0,
@@ -850,6 +866,8 @@ CONTROL_COMMAND_DICT = {
     "--help": 0,
     "-h": 0,
     "--ls-define": 0,
+    "-i": 0,
+    "--interactive": 0,
 }
 
 def process_args():
@@ -921,6 +939,10 @@ def process_args():
         elif arg == "--ls-define":
             ret = cmd_ls_define()
             sys.exit(ret)
+        elif arg == "-i" or arg == "--interactive":
+            # Enters interactive mode until it returns
+            interactive_mode()
+            sys.exit(0)
         elif arg == "--debug":
             debug_flag = True
         elif arg == "--force":
@@ -971,6 +993,8 @@ The following is used without specifying the [word]
 --ls-cache        List words in the cache. One word each line
 --ls-define       Print the absolute file name of the utility
 --ls-dir          Print the directory of this file
+
+-i/--interactive  Start in interactive mode
 """
 verbose_flag = False
 word_group_flag = False
@@ -986,6 +1010,8 @@ query_word = sys.argv[1]
 meaning_dict_list = None
 if force_flag is False:
     meaning_dict_list = check_in_cache(query_word)
+else:
+    dbg_printf("Ignoring the cache and to force an HTTP request")
 
 if meaning_dict_list is None:
     collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(query_word))))
