@@ -852,6 +852,30 @@ def interactive_mode():
     
     :return: None
     """
+    # Import it here to avoid extra overhead even if we do not use interactive mode
+    import curses
+    def main(stdscr):
+        """
+        This function defines the main function for event loop. It will be 
+        passed as the call back to curses library. The curses library will pass in
+        a stdscr object
+        
+        :return: None
+        """
+        stdscr.border()
+        while True:
+            ch = stdscr.getch()
+            if ch == ord('q'):
+                break
+            else:
+                stdscr.addstr(0, 0, str(ch))
+
+        return
+
+    # Start the wrapper and handles initialization, tearing down
+    # and exception handling
+    curses.wrapper(main)
+
     return
 
 # This dict object maps the argument from keyword to the maximum number
