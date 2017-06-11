@@ -854,6 +854,43 @@ def interactive_mode():
     """
     # Import it here to avoid extra overhead even if we do not use interactive mode
     import curses
+    class Context:
+        """
+        This class represents the context object used by interactive mode
+        """
+        def __init__(self, stdscr):
+            """
+            Initializes the context object
+            :param stdscr: Global window object
+            """
+            # Unpack the returned tuple into col and row numbers
+            self.row_num, self.col_num = stdscr.getmaxyx()
+            self.stdscr = stdscr
+
+            return
+
+        def print_str(self, row, col, s, attr=0):
+            """
+            This function prints a string at row, col
+            
+            :return: 
+            """
+            self.stdscr.addstr(row, col, s, attr)
+            return
+
+    def draw_title(context):
+        """
+        This function draws the title at the top of the window
+        
+        :param context: The context object that holds stdscr and other
+                        important parameters
+        :return: None 
+        """
+        title = "YouDao Online Dictionary Client"
+        title_col_offset = (context.col_num - len(title)) / 2
+        context.print_str(1, title_col_offset, title, curses.A_BOLD | curses.A_UNDERLINE | curses.color_pair(1))
+        return
+
     def main(stdscr):
         """
         This function defines the main function for event loop. It will be 
@@ -862,7 +899,13 @@ def interactive_mode():
         
         :return: None
         """
-        stdscr.border()
+        # This is a context object that will be used globally
+        context = Context(stdscr)
+        context.stdscr.border()
+        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        draw_title(context)
+
+
         while True:
             ch = stdscr.getch()
             if ch == ord('q'):
