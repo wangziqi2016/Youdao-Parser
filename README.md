@@ -29,3 +29,5 @@ Parses YouDao online dictionary's result and display them on the terminal in a p
     --ls-cache        List words in the cache. One word each line
     --ls-define       Print the absolute file name of the utility
     --ls-dir          Print the directory of this file
+
+    -i/--interactive  Start in interactive mode
