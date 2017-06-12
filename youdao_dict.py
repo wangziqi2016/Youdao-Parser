@@ -866,6 +866,10 @@ def interactive_mode():
         COLOR_YELLOW = 4
         COLOR_MAX = 4
 
+        KEY_ESC = 27
+        KEY_ENTER = 13
+        KEY_BACK = 263
+
         def __init__(self, stdscr):
             """
             Initializes the context object
@@ -877,6 +881,9 @@ def interactive_mode():
 
             # This represents what we need to draw for the status
             self.status_dict = {}
+
+            # This is the input string
+            self.input_str = ""
 
             return
 
@@ -924,7 +931,7 @@ def interactive_mode():
             offset = 1
             for key in key_list:
                 key_length = len(key) + 2
-                self.print_str(-2, offset, key + ": ", context.get_color(self.COLOR_RED))
+                self.print_str(-2, offset, key + ": ", self.get_color(self.COLOR_RED))
                 offset += key_length
 
                 value = self.status_dict[key]
@@ -978,6 +985,15 @@ def interactive_mode():
         :param ch: The control code for the input
         :return: None 
         """
+        # Store the character's integer value in status bar
+        context.status_dict["Keyboard"] = str(ch)
+        context.update_status()
+
+        # If it belongs to ASCII character type then add it to the input string
+        # of class context and update the input pad
+        if ord("a") <= ch <= ord("z") or ord("A") <= ch <= ord("Z"):
+            context.input_str += chr(ch)
+            
 
         return
 
@@ -999,11 +1015,12 @@ def interactive_mode():
 
         while True:
             ch = stdscr.getch()
-            if ch == ord('q'):
+            # Exits on ESCAPE key
+            if ch == Context.KEY_ESC:
                 break
             else:
                 # This draws the input pad
-                draw_input(ch)
+                draw_input(context, ch)
 
         return
 
