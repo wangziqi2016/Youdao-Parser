@@ -867,7 +867,7 @@ def interactive_mode():
         COLOR_MAX = 4
 
         KEY_ESC = 27
-        KEY_ENTER = 13
+        KEY_ENTER = 10
         KEY_BACK = 263
 
         def __init__(self, stdscr):
@@ -987,13 +987,25 @@ def interactive_mode():
         """
         # Store the character's integer value in status bar
         context.status_dict["Keyboard"] = str(ch)
+        context.status_dict.pop("Error", None)
         context.update_status()
 
         # If it belongs to ASCII character type then add it to the input string
         # of class context and update the input pad
         if ord("a") <= ch <= ord("z") or ord("A") <= ch <= ord("Z"):
+            context.print_str(3, len(context.input_str) + 8, chr(ch))
             context.input_str += chr(ch)
-            
+        elif ch == Context.KEY_BACK:
+            current_input_len = len(context.input_str)
+            # Back only if there is no current input
+            if current_input_len != 0:
+                context.print_str(3, len(context.input_str) + 8 - 1, " ")
+                context.input_str = context.input_str[:-1]
+                y, x = context.stdscr.getyx()
+                context.stdscr.move(y, x - 1)
+            else:
+                context.status_dict["Error"] = "No character to delete"
+                context.update_status()
 
         return
 
