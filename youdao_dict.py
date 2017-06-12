@@ -843,6 +843,30 @@ def cmd_ls_define():
 # The following implements interactive mode
 #####################################################################
 
+class InterfaceError:
+    """
+    This is the error thrown for any unhandled error within the interface
+    """
+    def __init__(self, message):
+        """
+        Initialize the exception object
+        
+        :param message: A string message
+        """
+        self.message = message
+        return
+
+    def __str__(self):
+        """
+        Extracts the string message of the exception
+        
+        :return: str
+        """
+        return self.message
+
+    __repr__ = __str__
+
+
 def interactive_mode():
     """
     This function initializes interactive mode and functions as the dispatching
@@ -875,6 +899,11 @@ def interactive_mode():
         # This is the column where the input string should start
         COL_INPUT_START = 8
 
+        # Minimum number of rows required to start this interface
+        MIN_ROW_NUM = 7
+        # Minimum number of columns required to start this interface
+        MIN_COL_NUM = 10
+
         def __init__(self, stdscr):
             """
             Initializes the context object
@@ -882,7 +911,14 @@ def interactive_mode():
             """
             # Unpack the returned tuple into col and row numbers
             self.row_num, self.col_num = stdscr.getmaxyx()
+            if self.row_num < self.MIN_ROW_NUM or self.col_num < self.MIN_COL_NUM:
+
+
             self.stdscr = stdscr
+
+            # This is the maximum length allowed for the input string
+            # We should treat this as a costant
+            self.input_max_length = self.col_num - self.COL_INPUT_START - 2
 
             # This represents what we need to draw for the status
             self.status_dict = {}
@@ -1034,6 +1070,9 @@ def interactive_mode():
             else:
                 context.status_dict["Error"] = "No character to delete"
                 context.update_status()
+
+        # No matter what happens this is always called because we need to
+        context.locate_cursor_to_input()
 
         return
 
