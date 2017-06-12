@@ -926,6 +926,9 @@ def interactive_mode():
             
             :return: None 
             """
+            # Delete everything currently on the status line first
+            self.print_str(-2, 1, " " * (self.col_num - 2))
+
             key_list = list(self.status_dict.keys())
             key_list.sort()
             offset = 1
