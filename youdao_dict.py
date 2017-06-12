@@ -875,15 +875,30 @@ def interactive_mode():
             self.row_num, self.col_num = stdscr.getmaxyx()
             self.stdscr = stdscr
 
+            # This represents what we need to draw for the status
+            self.status_dict = {}
+
             return
 
-        def print_str(self, row, col, s, attr=0):
+        def print_str(self, row, col, s, attr=None):
             """
             This function prints a string at row, col
             
-            :return: 
+            :param row: Could be minus number. -1 means last line
+            :param col: Could be minus number. -1 means last column
+            :return: None
             """
-            self.stdscr.addstr(row, col, s, attr)
+            # Deal with the cases when it is less than zero
+            if row < 0:
+                row = self.row_num + row
+            if col < 0:
+                col = self.col_num + col
+
+            if attr is not None:
+                self.stdscr.addstr(row, col, s, attr)
+            else:
+                self.stdscr.addstr(row, col, s)
+
             return
 
         @classmethod
@@ -898,7 +913,42 @@ def interactive_mode():
             assert(cls.COLOR_MIN <= color_index <= cls.COLOR_MAX)
             return curses.color_pair(color_index)
 
-    def draw_title(context):
+        def update_status(self):
+            """
+            This function updates the status bar
+            
+            :return: None 
+            """
+            key_list = list(self.status_dict.keys())
+            key_list.sort()
+            offset = 1
+            for key in key_list:
+                key_length = len(key) + 2
+                self.print_str(-2, offset, key + ": ", context.get_color(self.COLOR_RED))
+                offset += key_length
+
+                value = self.status_dict[key]
+                value_length = len(value) + 1
+                self.print_str(-2, offset, value + " ")
+                offset += value_length
+
+            return
+
+    def init_color(context):
+        """
+        This function initializes colors using the constants from the context 
+        class variable
+
+        :return: None
+        """
+        curses.init_pair(Context.COLOR_RED, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(Context.COLOR_GREEN, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(Context.COLOR_BLUE, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        curses.init_pair(Context.COLOR_YELLOW, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+
+        return
+
+    def draw_frame(context):
         """
         This function draws the title at the top of the window
         
@@ -906,22 +956,28 @@ def interactive_mode():
                         important parameters
         :return: None 
         """
+        # Draws the title
         title = "YouDao Online Dictionary Client"
         title_col_offset = (context.col_num - len(title)) / 2
         context.print_str(1, title_col_offset, title, curses.A_BOLD | context.get_color(context.COLOR_YELLOW))
+        context.print_str(2, 1, "-" * (context.col_num - 2))
+
+        # Then draws the status bar
+        context.print_str(-3, 1, "-" * (context.col_num - 2))
+
+        # Draws the input prompt
+        context.print_str(3, 1, "Input: ")
+
         return
 
-    def init_color(context):
+    def draw_input(context, ch):
         """
-        This function initializes colors using the constants from the context 
-        class variable
+        This function draws the input pad for querying words
         
-        :return: None
+        :param context: The Context object
+        :param ch: The control code for the input
+        :return: None 
         """
-        curses.init_pair(Context.COLOR_RED, curses.COLOR_RED, curses.COLOR_BLACK)
-        curses.init_pair(Context.COLOR_GREEN, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(Context.COLOR_BLUE, curses.COLOR_BLUE, curses.COLOR_BLACK)
-        curses.init_pair(Context.COLOR_YELLOW, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
         return
 
@@ -938,15 +994,16 @@ def interactive_mode():
         context.stdscr.border()
         # This is only done once no matter how many context objects we create
         init_color(context)
-
-        draw_title(context)
+        # Draws the frame of the window including title and status bar
+        draw_frame(context)
 
         while True:
             ch = stdscr.getch()
             if ch == ord('q'):
                 break
             else:
-                stdscr.addstr(0, 0, str(ch))
+                # This draws the input pad
+                draw_input(ch)
 
         return
 
