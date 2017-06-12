@@ -920,7 +920,7 @@ def interactive_mode():
                 raise InterfaceError("Window should have at least %d columns" % (self.MIN_COL_NUM, ))
 
             # This is the maximum length allowed for the input string
-            # We should treat this as a costant
+            # We should treat this as a constant
             self.input_max_length = self.col_num - self.COL_INPUT_START - 2
 
             # This represents what we need to draw for the status
@@ -1056,10 +1056,19 @@ def interactive_mode():
         # If it belongs to ASCII character type then add it to the input string
         # of class context and update the input pad
         if ord("a") <= ch <= ord("z") or ord("A") <= ch <= ord("Z"):
-            context.print_str(Context.ROW_INPUT_LINE,
-                              len(context.input_str) + Context.COL_INPUT_START,
-                              chr(ch))
-            context.input_str += chr(ch)
+            assert(len(context.input_str) <= context.input_max_length)
+            # If the input string is too long we simply prompt an error
+            # and discard the input
+            if len(context.input_str) == context.input_max_length:
+                context.status_dict["Error"] = \
+                    "Input too long (limit = %d)" % (context.input_max_length, )
+                # Reflect it to the status bar
+                context.update_status()
+            else:
+                context.print_str(Context.ROW_INPUT_LINE,
+                                  len(context.input_str) + Context.COL_INPUT_START,
+                                  chr(ch))
+                context.input_str += chr(ch)
         elif ch == Context.KEY_BACK:
             current_input_len = len(context.input_str)
             # Back only if there is no current input
