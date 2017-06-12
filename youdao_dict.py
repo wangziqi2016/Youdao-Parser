@@ -870,6 +870,11 @@ def interactive_mode():
         KEY_ENTER = 10
         KEY_BACK = 263
 
+        # This is the row number for input line
+        ROW_INPUT_LINE = 3
+        # This is the column where the input string should start
+        COL_INPUT_START = 8
+
         def __init__(self, stdscr):
             """
             Initializes the context object
@@ -944,6 +949,21 @@ def interactive_mode():
 
             return
 
+        def locate_cursor_to_input(self):
+            """
+            This function changes the location of the cursor to match the length of the string
+            and also to keep the focus on the input box
+            
+            :return: None
+            """
+            cursor_row = self.ROW_INPUT_LINE
+            cursor_col = len(self.input_str) + self.COL_INPUT_START
+
+            # Call cursor method to move the input cursor symbol
+            self.stdscr.move(cursor_row, cursor_col)
+
+            return
+
     def init_color(context):
         """
         This function initializes colors using the constants from the context 
@@ -960,7 +980,8 @@ def interactive_mode():
 
     def draw_frame(context):
         """
-        This function draws the title at the top of the window
+        This function draws the title at the top of the window. This is only called once
+        in order to 
         
         :param context: The context object that holds stdscr and other
                         important parameters
@@ -976,7 +997,7 @@ def interactive_mode():
         context.print_str(-3, 1, "-" * (context.col_num - 2))
 
         # Draws the input prompt
-        context.print_str(3, 1, "Input: ")
+        context.print_str(Context.ROW_INPUT_LINE, 1, "Input: ")
 
         return
 
@@ -996,16 +1017,20 @@ def interactive_mode():
         # If it belongs to ASCII character type then add it to the input string
         # of class context and update the input pad
         if ord("a") <= ch <= ord("z") or ord("A") <= ch <= ord("Z"):
-            context.print_str(3, len(context.input_str) + 8, chr(ch))
+            context.print_str(Context.ROW_INPUT_LINE,
+                              len(context.input_str) + Context.COL_INPUT_START,
+                              chr(ch))
             context.input_str += chr(ch)
         elif ch == Context.KEY_BACK:
             current_input_len = len(context.input_str)
             # Back only if there is no current input
             if current_input_len != 0:
-                context.print_str(3, len(context.input_str) + 8 - 1, " ")
+                # Use a space character to overwrite the deleted character
+                context.print_str(Context.ROW_INPUT_LINE,
+                                  len(context.input_str) + Context.COL_INPUT_START - 1,
+                                  " ")
+                # Trim the actual string
                 context.input_str = context.input_str[:-1]
-                y, x = context.stdscr.getyx()
-                context.stdscr.move(y, x - 1)
             else:
                 context.status_dict["Error"] = "No character to delete"
                 context.update_status()
