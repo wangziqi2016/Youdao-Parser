@@ -30,4 +30,4 @@ Parses YouDao online dictionary's result and display them on the terminal in a p
     --ls-define       Print the absolute file name of the utility
     --ls-dir          Print the directory of this file
 
-    -i/--interactive  Start in interactive mode
+    -i/--interactive  Start in interactive mode; Press ESC to exit
