@@ -900,21 +900,24 @@ def interactive_mode():
         COL_INPUT_START = 8
 
         # Minimum number of rows required to start this interface
-        MIN_ROW_NUM = 7
+        MIN_ROW_NUM = 10
         # Minimum number of columns required to start this interface
-        MIN_COL_NUM = 10
+        MIN_COL_NUM = 15
 
         def __init__(self, stdscr):
             """
             Initializes the context object
             :param stdscr: Global window object
             """
+            self.stdscr = stdscr
+
             # Unpack the returned tuple into col and row numbers
             self.row_num, self.col_num = stdscr.getmaxyx()
-            if self.row_num < self.MIN_ROW_NUM or self.col_num < self.MIN_COL_NUM:
-
-
-            self.stdscr = stdscr
+            # Check the dimension of the interface
+            if self.row_num < self.MIN_ROW_NUM:
+                raise InterfaceError("Window should have at least %d rows" % (self.MIN_ROW_NUM, ))
+            elif self.col_num < self.MIN_COL_NUM:
+                raise InterfaceError("Window should have at least %d columns" % (self.MIN_COL_NUM, ))
 
             # This is the maximum length allowed for the input string
             # We should treat this as a costant
