@@ -1199,7 +1199,13 @@ def process_args():
             sys.exit(ret)
         elif arg == "-i" or arg == "--interactive":
             # Enters interactive mode until it returns
-            interactive_mode()
+            # We also catch interface error to handle those errors
+            # that must be handled outside the interface
+            try:
+                interactive_mode()
+            except InterfaceError as e:
+                print("Error: " + str(e))
+
             sys.exit(0)
         elif arg == "--debug":
             debug_flag = True
