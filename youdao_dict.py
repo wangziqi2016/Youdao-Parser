@@ -858,6 +858,14 @@ def interactive_mode():
         """
         This class represents the context object used by interactive mode
         """
+        # These are color indices we use for specifying the foreground color
+        COLOR_MIN = 1
+        COLOR_RED = 1
+        COLOR_GREEN = 2
+        COLOR_BLUE = 3
+        COLOR_YELLOW = 4
+        COLOR_MAX = 4
+
         def __init__(self, stdscr):
             """
             Initializes the context object
@@ -878,6 +886,18 @@ def interactive_mode():
             self.stdscr.addstr(row, col, s, attr)
             return
 
+        @classmethod
+        def get_color(cls, color_index):
+            """
+            This function returns the color attribute that could be applyed
+            to strings as its attribute
+            
+            :param color_index: The color code defined in the class 
+            :return: attribute object
+            """
+            assert(cls.COLOR_MIN <= color_index <= cls.COLOR_MAX)
+            return curses.color_pair(color_index)
+
     def draw_title(context):
         """
         This function draws the title at the top of the window
@@ -888,7 +908,21 @@ def interactive_mode():
         """
         title = "YouDao Online Dictionary Client"
         title_col_offset = (context.col_num - len(title)) / 2
-        context.print_str(1, title_col_offset, title, curses.A_BOLD | curses.A_UNDERLINE | curses.color_pair(1))
+        context.print_str(1, title_col_offset, title, curses.A_BOLD | context.get_color(context.COLOR_YELLOW))
+        return
+
+    def init_color(context):
+        """
+        This function initializes colors using the constants from the context 
+        class variable
+        
+        :return: None
+        """
+        curses.init_pair(Context.COLOR_RED, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(Context.COLOR_GREEN, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(Context.COLOR_BLUE, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        curses.init_pair(Context.COLOR_YELLOW, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+
         return
 
     def main(stdscr):
@@ -902,9 +936,10 @@ def interactive_mode():
         # This is a context object that will be used globally
         context = Context(stdscr)
         context.stdscr.border()
-        curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        draw_title(context)
+        # This is only done once no matter how many context objects we create
+        init_color(context)
 
+        draw_title(context)
 
         while True:
             ch = stdscr.getch()
