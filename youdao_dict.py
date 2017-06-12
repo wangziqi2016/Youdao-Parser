@@ -1267,7 +1267,7 @@ The following is used without specifying the [word]
 --ls-define       Print the absolute file name of the utility
 --ls-dir          Print the directory of this file
 
--i/--interactive  Start in interactive mode
+-i/--interactive  Start in interactive mode; Press ESC to exit
 """
 verbose_flag = False
 word_group_flag = False
