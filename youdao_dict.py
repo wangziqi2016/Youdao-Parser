@@ -932,25 +932,91 @@ def interactive_mode():
             :param ch: Single unicode or str object
             :return: int (1 or 2)
             """
+            # If ch is more than one character this will pop up an error
             value = ord(ch)
             if 0 <= value < 256:
                 return 1
+            else:
+                return 2
 
-            return 2
+        def _append_line(self, s):
+            """
+            This function appends a line into the line list, adding a new page
+            if the current line list is full
+            
+            Note that an empty unicode string represents new line.
+            
+            :param s: The string get added; must be unicode
+            :return: None
+            """
+            # always try to append to the last page
+            last_page = self.page_list[-1]
+            assert(len(last_page) <= self.row_num)
+            # If the last page has already been filled then we need to
+            # create a new page and append it to the page list
+            if len(last_page) == self.row_num:
+                self.page_list.append([])
+                # Change the last page to the page we just appended
+                last_page = self.page_list[-1]
+
+            # At last just append the last page
+            last_page.append(s)
+
+            return
 
         def add_line(self, s):
             """
             This function adds one line into the page, and will create new pages if the line
-            id splited into multiple printed lines
+            is splitted into multiple printed lines
             
             :param s: Must be a str or unicode string. We will decode() it to unicode anyway
             :return: None 
             """
+            # Decode it into unicode no matter what is the original format
             s = s.decode()
 
-            for ch in s:
-                if 0 <= ch < 127:
+            # For empty line and single new line just make it as an empty line
+            if len(s) == 0:
+                self._append_line(u"")
+                return
+            elif len(s) == 1 and s[0] == u'\n':
+                self._append_line(u"")
+                return
+            elif s[-1] == u"\n":
+                # Strip the last new line character from the string
+                s = s[:-1]
 
+            # First pass makes sure there is not new lne character
+            # in the string
+            for ch in s:
+                if ch == u"\n":
+                    raise InterfaceError("Could not use new line character in add_line()")
+
+            # Actual width
+            current_width = 0
+            # Index that we start the physical line
+            start_index = 0
+            # Number of code points we have processed
+            current_index = 0
+            # Then compute the width of the string and
+            for ch in s:
+                width = self.get_char_width(ch)
+                # If the string will exceed the current line then we
+                # start a new line
+                if current_width + width >= self.col_num:
+                    assert(current_index > start_index)
+                    # Since current index has not been added we truncate
+                    # at current index
+                    self._append_line(s[start_index:current_index])
+
+                    start_index = current_index
+                    current_width = 0
+
+                # This will be executed even if we append a new line
+                current_index += 1
+                current_width += width
+
+            return
 
     class Context:
         """
