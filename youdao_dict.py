@@ -980,8 +980,10 @@ def interactive_mode():
             :return: None 
             """
             # Decode it into unicode no matter what is the original format
-            if isinstance(s, unicode) is False and hasattr(s, "decode"):
+            try:
                 s = s.decode()
+            except (ValueError, AttributeError):
+                pass
 
             # For empty line and single new line just make it as an empty line
             if len(s) == 0:
@@ -1035,9 +1037,12 @@ def interactive_mode():
             :param s: The string to be added. Can be a str object or unicode string
             :return: None 
             """
-            if isinstance(s, unicode) is False and hasattr(s, "decode"):
-                # Decode it into unicode
+            # Try to decode it, and if any problem occurs we
+            # just use the original string
+            try:
                 s = s.decode()
+            except (ValueError, AttributeError):
+                pass
 
             line_list = s.split(u"\n")
             for line in line_list:
@@ -1065,6 +1070,8 @@ def interactive_mode():
                 abs_start_col = self.start_col
 
                 self.context.print_str(abs_start_row, abs_start_col, line)
+
+                current_row += 1
 
             return
 
@@ -1310,7 +1317,7 @@ def interactive_mode():
         This class aggregates write() method's input as a string
         and converts to a string when requested
         """
-        def __init__(self): self.s = ""
+        def __init__(self): self.s = u""
         def write(self, s): self.s += s
         def __str__(self): return self.s
         __repr__ = __str__
@@ -1392,7 +1399,7 @@ def interactive_mode():
         text_area = TextArea(context,
                              context.get_screen_row_num() - 7,
                              context.get_screen_col_num() - 2,
-                             4,
+                             5,
                              1)
         context.text_area = text_area
         text_area.clear()
