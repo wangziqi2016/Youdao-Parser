@@ -1147,7 +1147,7 @@ def interactive_mode():
             # Access last and then delete the position
             row, col = self.cursor_stack.pop()
             self.stdscr.move(row, col)
-            
+
             return
 
         def get_screen_row_num(self):
@@ -1180,9 +1180,9 @@ def interactive_mode():
                 col = self.col_num + col
 
             if attr is not None:
-                self.stdscr.addstr(row, col, s, attr)
+                self.stdscr.addstr(row, col, s.encode("utf-8"), attr)
             else:
-                self.stdscr.addstr(row, col, s)
+                self.stdscr.addstr(row, col, s.encode("utf-8"))
 
             return
 
@@ -1204,6 +1204,9 @@ def interactive_mode():
             
             :return: None 
             """
+            # Save cursor location
+            self.push_cursor()
+
             # Delete everything currently on the status line first
             self.print_str(-2, 1, " " * (self.col_num - 2))
 
@@ -1220,6 +1223,8 @@ def interactive_mode():
                 self.print_str(-2, offset, value + " ")
                 offset += value_length
 
+            # Restore cursor location
+            self.pop_cursor()
             return
 
         def locate_cursor_to_input(self):
@@ -1253,6 +1258,8 @@ def interactive_mode():
 
         :return: None
         """
+        del context
+
         curses.init_pair(Context.COLOR_RED, curses.COLOR_RED, curses.COLOR_BLACK)
         curses.init_pair(Context.COLOR_GREEN, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(Context.COLOR_BLUE, curses.COLOR_BLUE, curses.COLOR_BLACK)
@@ -1326,7 +1333,7 @@ def interactive_mode():
                 context.status_dict["Error"] = "No character to delete"
                 context.update_status()
 
-        # No matter what happens this is always called because we need to
+        # No matter what happens this is always called
         context.locate_cursor_to_input()
 
         return
