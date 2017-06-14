@@ -996,7 +996,7 @@ def interactive_mode():
                 # Strip the last new line character from the string
                 s = s[:-1]
 
-            # First pass makes sure there is not new lne character
+            # First pass makes sure there is not new line character
             # in the string
             for ch in s:
                 if ch == u"\n":
@@ -1013,7 +1013,7 @@ def interactive_mode():
                 width = self.get_char_width(ch)
                 # If the string will exceed the current line then we
                 # start a new line
-                if current_width + width >= self.col_num:
+                if current_width + width + 1 >= self.col_num:
                     assert(current_index > start_index)
                     # Since current index has not been added we truncate
                     # at current index
@@ -1025,6 +1025,12 @@ def interactive_mode():
                 # This will be executed even if we append a new line
                 current_index += 1
                 current_width += width
+
+            # And then add what was remained there
+            if current_index > start_index:
+                # Since current index has not been added we truncate
+                # at current index
+                self._append_line(s[start_index:current_index])
 
             return
 
