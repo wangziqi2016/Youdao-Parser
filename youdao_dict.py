@@ -980,7 +980,8 @@ def interactive_mode():
             :return: None 
             """
             # Decode it into unicode no matter what is the original format
-            s = s.decode()
+            if isinstance(s, unicode) is False and hasattr(s, "decode"):
+                s = s.decode()
 
             # For empty line and single new line just make it as an empty line
             if len(s) == 0:
@@ -1034,8 +1035,9 @@ def interactive_mode():
             :param s: The string to be added. Can be a str object or unicode string
             :return: None 
             """
-            # Decode it into unicode
-            s = s.decode()
+            if isinstance(s, unicode) is False and hasattr(s, "decode"):
+                # Decode it into unicode
+                s = s.decode()
 
             line_list = s.split(u"\n")
             for line in line_list:
@@ -1076,7 +1078,7 @@ def interactive_mode():
             self.context.push_cursor()
             # For each line, print empty string
             for row in range(self.start_row, self.start_row + self.row_num):
-                self.context.print_str(row, self.start_col, "#" * self.col_num)
+                self.context.print_str(row, self.start_col, " " * self.col_num)
             self.context.pop_cursor()
             return
 
@@ -1095,6 +1097,8 @@ def interactive_mode():
         KEY_ESC = 27
         KEY_ENTER = 10
         KEY_BACK = 263
+        KEY_PLUS = 61
+        KEY_MINUS = 45
 
         # This is the row number for input line
         ROW_INPUT_LINE = 3
@@ -1301,6 +1305,16 @@ def interactive_mode():
 
         return
 
+    class OutputDevice:
+        """
+        This class aggregates write() method's input as a string
+        and converts to a string when requested
+        """
+        def __init__(self): self.s = ""
+        def write(self, s): self.s += s
+        def __str__(self): return self.s
+        __repr__ = __str__
+
     def draw_input(context, ch):
         """
         This function draws the input pad for querying words
@@ -1343,6 +1357,20 @@ def interactive_mode():
             else:
                 context.status_dict["Error"] = "No character to delete"
                 context.update_status()
+        elif ch == Context.KEY_ENTER:
+            # If enter is pressed we need to initialize a request and wait for result
+            # In the mean time all inputs are blocked
+            w = context.input_str
+            d_list = check_in_cache(w)
+            output_device = OutputDevice()
+            if d_list is None:
+                collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(w))), output_device)
+            else:
+                collins_pretty_print(d_list, output_device)
+
+            # Add it into the text area and then print it
+            context.text_area.add_block(output_device.s)
+            context.text_area.display_page(0)
 
         # No matter what happens this is always called
         context.locate_cursor_to_input()
