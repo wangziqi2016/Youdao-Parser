@@ -911,6 +911,8 @@ def interactive_mode():
             elif col_num + start_col >= context.get_screen_col_num():
                 raise InterfaceError("TextArea columns out of screen")
 
+            self.context = context
+
             self.row_num = row_num
             self.col_num = col_num
             self.start_row = start_row
@@ -1033,6 +1035,29 @@ def interactive_mode():
             line_list = s.split(u"\n")
             for line in line_list:
                 self.add_line(line)
+
+            return
+
+        def display_page(self, page_num):
+            """
+            This function displays the content of a page given the page num. Page num must not 
+            exceed the actual number of pages we have
+            
+            :param page_num: The page number. Start with 0 
+            :return: None
+            """
+            # Check the validity of the page num
+            if page_num >= len(self.page_list):
+                raise InterfaceError("Page number %d does not exist" % (page_num, ))
+
+            line_list = self.page_list[page_num]
+            current_row = 0
+            for line in line_list:
+                # These two are absolute numbers
+                abs_start_row = self.start_row + current_row
+                abs_start_col = self.start_col
+
+                self.context.print_str(abs_start_row, abs_start_col, line)
 
             return
 
