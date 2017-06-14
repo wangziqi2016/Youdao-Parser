@@ -878,6 +878,29 @@ def interactive_mode():
     """
     # Import it here to avoid extra overhead even if we do not use interactive mode
     import curses
+
+    class TextArea:
+        """
+        This class defines a text area that could:
+            (1) Hold multi-line text
+            (2) Adjust the range of rows displayed according to the actual dimension
+                of the text area (vertical)
+            (3) Automatic wrap-back of rows if text area row length is less than the 
+                actual line length (horizontal)
+        """
+        def __init__(self, context, row_num, col_num, start_row, start_col):
+            """
+            Initialize the dimension of the text area. We need its size and absolute position
+            on the screen, which should be within the screen
+            
+            :param context: The context object
+            :param row_num: The height of the control
+            :param col_num: The width of the control
+            :param start_row: Absolute row of the text area on the screen
+            :param start_col: Absolute column of the text area on the screen
+            """
+
+
     class Context:
         """
         This class represents the context object used by interactive mode
@@ -937,6 +960,7 @@ def interactive_mode():
             
             :param row: Could be minus number. -1 means last line
             :param col: Could be minus number. -1 means last column
+            :param s: 
             :return: None
             """
             # Deal with the cases when it is less than zero
