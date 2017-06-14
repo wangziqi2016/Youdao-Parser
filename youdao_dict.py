@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from bs4 import BeautifulSoup
 import bs4
@@ -9,6 +11,10 @@ import stat
 import inspect
 from random import randint
 import glob
+
+# This enables us to display unicode characters correctly
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def dbg_printf(format, *args):
     """
@@ -843,7 +849,7 @@ def cmd_ls_define():
 # The following implements interactive mode
 #####################################################################
 
-class InterfaceError:
+class InterfaceError(BaseException):
     """
     This is the error thrown for any unhandled error within the interface
     """
@@ -865,7 +871,6 @@ class InterfaceError:
         return self.message
 
     __repr__ = __str__
-
 
 def interactive_mode():
     """
@@ -900,14 +905,51 @@ def interactive_mode():
             :param start_col: Absolute column of the text area on the screen
             """
 
-
+            # Check rows and cols to make sure it is inside the screen
+            if row_num + start_row >= context.get_screen_row_num():
+                raise InterfaceError("TextArea rows out of screen")
+            elif col_num + start_col >= context.get_screen_col_num():
+                raise InterfaceError("TextArea columns out of screen")
 
             self.row_num = row_num
             self.col_num = col_num
             self.start_row = start_row
             self.start_col = start_col
 
+            # This is a list of pages that can be displayed at a time
+            # Its content is another list which contains lines (i.e. the line list)
+            self.page_list = [[]]
+
             return
+
+        @staticmethod
+        def get_char_width(ch):
+            """
+            This function returns the width of a character, supporting unicode. 
+            Our rule is that, for characters within 0 - 255 we always treat it as 
+            having length 1; For other characters we treat it as having length 2
+            
+            :param ch: Single unicode or str object
+            :return: int (1 or 2)
+            """
+            value = ord(ch)
+            if 0 <= value < 256:
+                return 1
+
+            return 2
+
+        def add_line(self, s):
+            """
+            This function adds one line into the page, and will create new pages if the line
+            id splited into multiple printed lines
+            
+            :param s: Must be a str or unicode string. We will decode() it to unicode anyway
+            :return: None 
+            """
+            s = s.decode()
+
+            for ch in s:
+                if 0 <= ch < 127:
 
 
     class Context:
@@ -1050,6 +1092,15 @@ def interactive_mode():
 
             return
 
+        def get_cursor_pos(self):
+            """
+            This function returns the row and col of the current cursor on the 
+            main window
+            
+            :return: tuple(row, col) 
+            """
+            return self.stdscr.getyx()
+
     def init_color(context):
         """
         This function initializes colors using the constants from the context 
@@ -1074,8 +1125,8 @@ def interactive_mode():
         :return: None 
         """
         # Draws the title
-        title = "YouDao Online Dictionary Client"
-        title_col_offset = (context.col_num - len(title)) / 2
+        title = u"YouDao Online Dictionary Client (有道词典)"
+        title_col_offset = (context.col_num - len(title)) >> 1
         context.print_str(1, title_col_offset, title, curses.A_BOLD | context.get_color(context.COLOR_YELLOW))
         context.print_str(2, 1, "-" * (context.col_num - 2))
 
