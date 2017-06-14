@@ -901,6 +901,15 @@ def interactive_mode():
             """
 
 
+
+            self.row_num = row_num
+            self.col_num = col_num
+            self.start_row = start_row
+            self.start_col = start_col
+
+            return
+
+
     class Context:
         """
         This class represents the context object used by interactive mode
@@ -953,6 +962,20 @@ def interactive_mode():
             self.input_str = ""
 
             return
+
+        def get_screen_row_num(self):
+            """
+            Returns the screen row number
+            :return: int
+            """
+            return self.row_num
+
+        def get_screen_col_num(self):
+            """
+            Returns the screen column number
+            :return: int
+            """
+            return self.col_num
 
         def print_str(self, row, col, s, attr=None):
             """
