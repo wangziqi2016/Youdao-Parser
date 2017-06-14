@@ -1073,6 +1073,12 @@ def interactive_mode():
             
             :return: None
             """
+            self.context.push_cursor()
+            # For each line, print empty string
+            for row in range(self.start_row, self.start_row + self.row_num):
+                self.context.print_str(row, self.start_col, " " * self.col_num)
+            self.context.pop_cursor()
+            return
 
     class Context:
         """
