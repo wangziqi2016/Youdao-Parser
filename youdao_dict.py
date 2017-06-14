@@ -1061,6 +1061,14 @@ def interactive_mode():
 
             return
 
+        def clear(self):
+            """
+            This function clears the printing area by filling it with space character
+            The cursor is not changed after this operation because we save the cursor
+            
+            :return: None
+            """
+
     class Context:
         """
         This class represents the context object used by interactive mode
@@ -1112,6 +1120,34 @@ def interactive_mode():
             # This is the input string
             self.input_str = ""
 
+            # This is a stack of cursor positions that is saved by calling
+            # corresponding routines
+            self.cursor_stack = []
+
+            return
+
+        def push_cursor(self):
+            """
+            Push a (row, col) tuple to the cursor stack
+            :return: None
+            """
+            self.cursor_stack.append(self.get_cursor_pos())
+            return
+
+        def pop_cursor(self):
+            """
+            This function pops a cursor position and change the cursor to it
+            
+            :return: None 
+            """
+            # Check whether the stack is empty
+            if len(self.cursor_stack) == 0:
+                raise InterfaceError("Cursor stack is empty")
+
+            # Access last and then delete the position
+            row, col = self.cursor_stack.pop()
+            self.stdscr.move(row, col)
+            
             return
 
         def get_screen_row_num(self):
