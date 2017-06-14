@@ -517,28 +517,30 @@ GREEN_TEXT_END = "\033[0m"
 YELLOW_TEXT_START = "\033[1;33m"
 YELLOW_TEXT_END = "\033[0m"
 
-def print_red(text):
+def print_red(text, output_device):
     """
     Prints the given text in read fore color
     
     :param text: The text to be printed
+    :param output_device: Object that supports write() method
     :return: None
     """
-    sys.stdout.write(RED_TEXT_START)
-    sys.stdout.write(text)
-    sys.stdout.write(RED_TEXT_END)
+    output_device.write(RED_TEXT_START)
+    output_device.write(text)
+    output_device.write(RED_TEXT_END)
     return
 
-def print_yellow(text):
+def print_yellow(text, output_device):
     """
     Prints the text in yellow foreground color
     
     :param text: The text to be printed 
+    :param output_device: Object that supports write() method
     :return: None
     """
-    sys.stdout.write(YELLOW_TEXT_START)
-    sys.stdout.write(text)
-    sys.stdout.write(YELLOW_TEXT_END)
+    output_device.write(YELLOW_TEXT_START)
+    output_device.write(text)
+    output_device.write(YELLOW_TEXT_END)
     return
 
 def process_color(s):
@@ -556,11 +558,14 @@ def process_color(s):
 
     return s
 
-def collins_pretty_print(dict_list):
+def collins_pretty_print(dict_list, output_device=sys.stdout):
     """
     Prints a dict object in pretty form. The input dict object may
     be None, in which case we skip printing
     
+    :param dict_list: A list of dict objects returned from the parser
+    :param output_device: An output object that supports write() method
+                          for printing or aggregating values
     :return: None
     """
     global verbose_flag
@@ -570,45 +575,45 @@ def collins_pretty_print(dict_list):
         return
 
     for d in dict_list:
-        print_red(d["word"])
-        sys.stdout.write("        ")
+        print_red(d["word"], output_device)
+        output_device.write("        ")
 
         # Write the frequency if it has one
         freq = d["frequency"]
         if freq != -1:
-            sys.stdout.write("[%s]        " % ("*" * freq, ))
+            output_device.write("[%s]        " % ("*" * freq, ))
 
-        sys.stdout.write(d["phonetic"])
-        sys.stdout.write("\n")
+        output_device.write(d["phonetic"])
+        output_device.write("\n")
 
         counter = 1
         for meaning in d["meanings"]:
             if m5_flag is True and counter == 6:
                 return
 
-            sys.stdout.write("%d. (%s) " % (counter, meaning["category"]))
+            output_device.write("%d. (%s) " % (counter, meaning["category"]))
             counter += 1
 
             text = process_color(meaning["text"])
-            sys.stdout.write(text)
+            output_device.write(text)
 
-            sys.stdout.write("\n")
+            output_device.write("\n")
 
             if verbose_flag is True:
                 for example in meaning["examples"]:
-                    sys.stdout.write("    - ")
-                    sys.stdout.write(example["text"])
-                    sys.stdout.write("\n")
-                    sys.stdout.write("      ")
-                    sys.stdout.write(example["translation"])
-                    sys.stdout.write("\n")
+                    output_device.write("    - ")
+                    output_device.write(example["text"])
+                    output_device.write("\n")
+                    output_device.write("      ")
+                    output_device.write(example["translation"])
+                    output_device.write("\n")
 
         # If we also print word group then print it
         if word_group_flag is True:
-            sys.stdout.write("\n")
+            output_device.write("\n")
             for word_group in d["word-group"]:
-                print_yellow(word_group["text"])
-                sys.stdout.write(" " + word_group["meaning"] + "\n")
+                print_yellow(word_group["text"], output_device)
+                output_device.write(" " + word_group["meaning"] + "\n")
 
     return
 
