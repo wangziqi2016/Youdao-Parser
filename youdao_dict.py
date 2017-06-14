@@ -1018,6 +1018,24 @@ def interactive_mode():
 
             return
 
+        def add_block(self, s):
+            """
+            Adds a text block to be displayed. The block might be divided into
+            lines and pages if its length and width exceeds the dimension of the 
+            text area
+            
+            :param s: The string to be added. Can be a str object or unicode string
+            :return: None 
+            """
+            # Decode it into unicode
+            s = s.decode()
+
+            line_list = s.split(u"\n")
+            for line in line_list:
+                self.add_line(line)
+
+            return
+
     class Context:
         """
         This class represents the context object used by interactive mode
