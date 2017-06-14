@@ -1147,6 +1147,8 @@ def interactive_mode():
 
             # This is the input string
             self.input_str = ""
+            # Whether do we allow input
+            self.input_blocked = False
 
             # This is a stack of cursor positions that is saved by calling
             # corresponding routines
@@ -1344,19 +1346,24 @@ def interactive_mode():
         # If it belongs to ASCII character type then add it to the input string
         # of class context and update the input pad
         if ord("a") <= ch <= ord("z") or ord("A") <= ch <= ord("Z"):
-            assert(len(context.input_str) <= context.input_max_length)
-            # If the input string is too long we simply prompt an error
-            # and discard the input
-            if len(context.input_str) == context.input_max_length:
-                context.status_dict["Error"] = \
-                    "Input too long (limit = %d)" % (context.input_max_length, )
-                # Reflect it to the status bar
+            # If input is blocked then print an info in the status bar and exit
+            if context.input_blocked is True:
+                context.status_dict = {"Error": "Please wait for result"}
                 context.update_status()
             else:
-                context.print_str(Context.ROW_INPUT_LINE,
-                                  len(context.input_str) + Context.COL_INPUT_START,
-                                  chr(ch))
-                context.input_str += chr(ch)
+                assert(len(context.input_str) <= context.input_max_length)
+                # If the input string is too long we simply prompt an error
+                # and discard the input
+                if len(context.input_str) == context.input_max_length:
+                    context.status_dict["Error"] = \
+                        "Input too long (limit = %d)" % (context.input_max_length, )
+                    # Reflect it to the status bar
+                    context.update_status()
+                else:
+                    context.print_str(Context.ROW_INPUT_LINE,
+                                      len(context.input_str) + Context.COL_INPUT_START,
+                                      chr(ch))
+                    context.input_str += chr(ch)
         elif ch == Context.KEY_BACK:
             current_input_len = len(context.input_str)
             # Back only if there is no current input
@@ -1371,19 +1378,34 @@ def interactive_mode():
                 context.status_dict["Error"] = "No character to delete"
                 context.update_status()
         elif ch == Context.KEY_ENTER:
+            context.input_blocked = True
+
             # If enter is pressed we need to initialize a request and wait for result
             # In the mean time all inputs are blocked
             w = context.input_str
             d_list = check_in_cache(w)
             output_device = OutputDevice()
             if d_list is None:
-                collins_pretty_print(get_collins_dict(parse_webpage(get_webpage(w))), output_device)
+                context.status_dict = {"Progressing": "Querying online source..."}
+                d_list = get_collins_dict(parse_webpage(get_webpage(w)))
+                if d_list is None:
+                    context.status_dict = {"Error": "Word not found"}
+                else:
+                    context.status_dict = {"Query": "Finished successfully"}
+                    collins_pretty_print(d_list, output_device)
             else:
+                context.status_dict = {"Query": "Satisfied from local cache"}
                 collins_pretty_print(d_list, output_device)
+
+            # We change status in every branch, so refresh it here
+            context.update_status()
 
             # Add it into the text area and then print it
             context.text_area.add_block(output_device.s)
             context.text_area.display_page(0)
+
+            # Allow input
+            context.input_blocked = False
 
         # No matter what happens this is always called
         context.locate_cursor_to_input()
