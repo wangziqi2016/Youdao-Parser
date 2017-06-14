@@ -1076,7 +1076,7 @@ def interactive_mode():
             self.context.push_cursor()
             # For each line, print empty string
             for row in range(self.start_row, self.start_row + self.row_num):
-                self.context.print_str(row, self.start_col, " " * self.col_num)
+                self.context.print_str(row, self.start_col, "#" * self.col_num)
             self.context.pop_cursor()
             return
 
@@ -1359,6 +1359,16 @@ def interactive_mode():
         """
         # This is a context object that will be used globally
         context = Context(stdscr)
+
+        # This is the main place we display text
+        text_area = TextArea(context,
+                             context.get_screen_row_num() - 7,
+                             context.get_screen_col_num() - 2,
+                             4,
+                             1)
+        context.text_area = text_area
+        text_area.clear()
+
         context.stdscr.border()
         # This is only done once no matter how many context objects we create
         init_color(context)
