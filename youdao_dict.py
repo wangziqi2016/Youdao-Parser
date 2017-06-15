@@ -1221,6 +1221,8 @@ def interactive_mode():
         COLOR_BEGIN_MARKER = u"\033[1;" # Followed by [dd]m where [dd] are two digits
         COLOR_END_MARKER = u"\033[0m"
 
+        # This is used to add color to the text
+        COLOR_ATTR_OVERRIDE = None
         def _print_str(self, row, col, s, attr):
             """
             This function is the real print_str() implementation which calls library
@@ -1253,6 +1255,9 @@ def interactive_mode():
             if col < 0:
                 col = self.col_num + col
 
+            self._print_str(row, col, s, attr)
+            return
+
             # This is the current index we are working on
             start_index = 0
             current_row = row
@@ -1279,14 +1284,33 @@ def interactive_mode():
                 color_code_start_index = color_begin_marker_index + len(self.COLOR_BEGIN_MARKER)
                 color_code = s[color_code_start_index:color_code_start_index + 3]
                 if len(color_code) != 3:
-                    raise InterfaceError("Invalid color code")
+                    raise InterfaceError(u"Invalid color code: \"%s\"" % (color_code, ))
+                elif color_code[-1] != u"m":
+                    raise InterfaceError("Did not see \"m\" after color code")
 
-                if color_code[-1]
+                if color_code == u"31m":
+                    color_attr = self.get_color(self.COLOR_RED)
+                elif color_code == u"32m":
+                    color_attr = self.get_color(self.COLOR_GREEN)
+                elif color_code == u"33m":
+                    color_attr = self.get_color(self.COLOR_YELLOW)
+                else:
+                    raise InterfaceError("Unknown color code")
 
                 # Then find the color end marker index
                 color_end_marker_index = s.find(self.COLOR_END_MARKER, color_begin_marker_index)
 
+                # TODO: FIX IT; CURRENTLY WE ONLY ALLOW COLOR BEGIN AND COLOR
+                # END ON THE SAME LINE
                 if color_end_marker_index == -1:
+                    raise InterfaceError("Did not find color end marker")
+
+                # Print the sub-string
+                self._print_str(current_row,
+                                current_col,
+                                s[color_code_start_index + 3:color_end_marker_index],
+                                color_attr)
+                start_index = color_end_marker_index + len(self.COLOR_END_MARKER)
 
             return
 
