@@ -1217,9 +1217,13 @@ def interactive_mode():
             """
             return self.col_num
 
+        # These two are used to mark the begin and end of colored outputs
+        COLOR_BEGIN_MARKER = u"\033[1;" # Followed by [dd]m where [dd] are two digits
+        COLOR_END_MARKER = u"\033[0m"
+
         def print_str(self, row, col, s, attr=None):
             """
-            This function prints a string at row, col
+            This function prints a string at row, col. This function also deals with colors
             
             :param row: Could be minus number. -1 means last line
             :param col: Could be minus number. -1 means last column
@@ -1231,6 +1235,28 @@ def interactive_mode():
                 row = self.row_num + row
             if col < 0:
                 col = self.col_num + col
+
+            # This is the current index we are working on
+            start_index = 0
+            while True:
+                # Find the color begin index if there is one
+                color_begin_marker_index = s.find(self.COLOR_BEGIN_MARKER)
+                if color_begin_marker_index == -1:
+                    break
+
+                # Then extract the next three characters from the input string
+                color_code_start_index = color_begin_marker_index + len(self.COLOR_BEGIN_MARKER)
+                color_code = s[color_code_start_index:color_code_start_index + 3]
+                if len(color_code) != 3:
+                    raise InterfaceError("Invalid color code")
+
+                if color_code[-1]
+
+                # Then find the color end marker index
+                color_end_marker_index = s.find(self.COLOR_END_MARKER, color_begin_marker_index)
+
+                if color_end_marker_index == -1:
+
 
             if attr is not None:
                 self.stdscr.addstr(row, col, s.encode("utf-8"), attr)
