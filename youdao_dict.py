@@ -1221,13 +1221,30 @@ def interactive_mode():
         COLOR_BEGIN_MARKER = u"\033[1;" # Followed by [dd]m where [dd] are two digits
         COLOR_END_MARKER = u"\033[0m"
 
+        def _print_str(self, row, col, s, attr):
+            """
+            This function is the real print_str() implementation which calls library
+            routine to print a string
+            
+            :param row: Could be minus number
+            :param col: Could be minus number
+            :param s: unicode string to be printed
+            :return: None
+            """
+            if attr is not None:
+                self.stdscr.addstr(row, col, s.encode("utf-8"), attr)
+            else:
+                self.stdscr.addstr(row, col, s.encode("utf-8"))
+
+            return
+
         def print_str(self, row, col, s, attr=None):
             """
             This function prints a string at row, col. This function also deals with colors
             
             :param row: Could be minus number. -1 means last line
             :param col: Could be minus number. -1 means last column
-            :param s: 
+            :param s: unicode string to be printed
             :return: None
             """
             # Deal with the cases when it is less than zero
@@ -1238,11 +1255,25 @@ def interactive_mode():
 
             # This is the current index we are working on
             start_index = 0
+            current_row = row
+            current_col = col
             while True:
                 # Find the color begin index if there is one
-                color_begin_marker_index = s.find(self.COLOR_BEGIN_MARKER)
+                color_begin_marker_index = s.find(self.COLOR_BEGIN_MARKER, start_index)
                 if color_begin_marker_index == -1:
+                    # Print what remains in the string buffer and return from the
+                    # function
+                    self._print_str(current_row, current_col, s[start_index:], attr)
                     break
+                else:
+                    # Otherwise print what is before the marker
+                    self._print_str(current_row,
+                                    current_col,
+                                    s[start_index:color_begin_marker_index], attr)
+
+                    # And then update cursor position because we could not rely on the
+                    # length of the string
+                    current_row, current_col = self.get_cursor_pos()
 
                 # Then extract the next three characters from the input string
                 color_code_start_index = color_begin_marker_index + len(self.COLOR_BEGIN_MARKER)
@@ -1256,12 +1287,6 @@ def interactive_mode():
                 color_end_marker_index = s.find(self.COLOR_END_MARKER, color_begin_marker_index)
 
                 if color_end_marker_index == -1:
-
-
-            if attr is not None:
-                self.stdscr.addstr(row, col, s.encode("utf-8"), attr)
-            else:
-                self.stdscr.addstr(row, col, s.encode("utf-8"))
 
             return
 
