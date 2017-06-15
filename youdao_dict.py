@@ -1081,7 +1081,7 @@ def interactive_mode():
 
             return
 
-        def clear(self):
+        def clear_display(self):
             """
             This function clears the printing area by filling it with space character
             The cursor is not changed after this operation because we save the cursor
@@ -1093,6 +1093,18 @@ def interactive_mode():
             for row in range(self.start_row, self.start_row + self.row_num):
                 self.context.print_str(row, self.start_col, " " * self.col_num)
             self.context.pop_cursor()
+            return
+
+        def clear_content(self):
+            """
+            This function clears the content of the text area by removing all pages and lines.
+            Existing contents on the page is not affected
+            
+            :return: None
+            """
+            # Restore it to a list of empty pages
+            self.page_list = [[]]
+            
             return
 
     class Context:
@@ -1112,6 +1124,7 @@ def interactive_mode():
         KEY_BACK = 263
         KEY_PLUS = 61
         KEY_MINUS = 45
+        KEY_HOME = 262
 
         # This is the row number for input line
         ROW_INPUT_LINE = 3
@@ -1430,7 +1443,7 @@ def interactive_mode():
                              5,
                              1)
         context.text_area = text_area
-        text_area.clear()
+        text_area.clear_display()
 
         context.stdscr.border()
         # This is only done once no matter how many context objects we create
