@@ -1576,7 +1576,7 @@ NORMAL_COMMAND_DICT = {
     "--verbose": 0,
     "-g": 0,
     "--word-group": 0,
-    "-m5": 0
+    "-m5": 0,
     "--debug": 0,
     "--force": 0,
     "--no-add": 0,
