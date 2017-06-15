@@ -1569,6 +1569,19 @@ CONTROL_COMMAND_DICT = {
     "--interactive": 0,
 }
 
+# This dict maps normal commands to the number of argument it takes
+# It is used to check whether every command line option is valid
+NORMAL_COMMAND_DICT = {
+    "-v": 0,
+    "--verbose": 0,
+    "-g": 0,
+    "--word-group": 0,
+    "-m5": 0
+    "--debug": 0,
+    "--force": 0,
+    "--no-add": 0,
+}
+
 def process_args():
     """
     This function processes arguments
