@@ -1104,7 +1104,17 @@ def interactive_mode():
             """
             # Restore it to a list of empty pages
             self.page_list = [[]]
+
+            return
+
+        def locate_cursor_to_begin(self):
+            """
+            This function locates the cursor to the beginning of the text area, i.e. row 0
+            column 0
             
+            :return: None 
+            """
+            self.context.stdscr.move(self.start_row, self.start_col)
             return
 
     class Context:
