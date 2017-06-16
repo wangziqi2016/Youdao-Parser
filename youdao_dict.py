@@ -83,6 +83,18 @@ def parse_webpage(s):
     """
     return BeautifulSoup(s, 'html.parser')
 
+def print_alternatives(tree):
+    """
+    This function prints alternative words if the collins div tag is not found
+    in the returned tree object.
+    
+    If alternative (suggested) word is also not found then this function prints
+    nothing and will return directly.
+    
+    :param tree: The tree object 
+    :return: None
+    """
+
 def get_collins_dict(tree):
     """
     This function returns results by collins dictionary, given the beautiful soup
@@ -120,6 +132,11 @@ def get_collins_dict(tree):
     collins_result = tree.find(id="collinsResult")
     if isinstance(collins_result, bs4.element.Tag) is False:
         dbg_printf("Did not find id='collinsResult'")
+
+        # Print suggested works or alternatives as there might be typos
+        # in user's input
+        print_alternatives(tree)
+
         # it is not a valid div object (usually None if the tag does
         # not exist)
         return None
