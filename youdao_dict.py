@@ -83,24 +83,48 @@ def parse_webpage(s):
     """
     return BeautifulSoup(s, 'html.parser')
 
-def print_alternatives(tree):
+def get_alternatives(tree):
     """
-    This function prints alternative words if the collins div tag is not found
+    This function returns alternative words if the collins div tag is not found
     in the returned tree object.
     
-    If alternative (suggested) word is also not found then this function prints
-    nothing and will return directly.
+    If alternative (suggested) word is also not found then this function returns
+    None. This behavior is consistent with the main parsing function, and the 
+    caller should not print anything
     
     :param tree: The tree object 
     :return: None
     """
+    # This is a list of typos
+    p_typo_list = tree.select("p.typo-rel")
+    # If we did not find any then return None
+    if len(p_typo_list) == 0:
+        return None
+
+    # We push all alternative words into this list
+    l = []
+    ret = {"alternatives": l}
+
+    index = -1
+    # For each suggestion in the list push it into the dict's list
+    for p_typo in p_typo_list:
+        index += 1
+        a = p_typo.find("a")
+        if a is None:
+            dbg_printf("The <a> tag is not found in <p> typo-rel (index = %d)",
+                       index)
+            continue
+
+        l.append(a.text)
+
+    return ret
 
 def get_collins_dict(tree):
     """
     This function returns results by collins dictionary, given the beautiful soup
     tree object
     
-    The return value is defined as follows: 
+    The return value is defined as a list of the following dict structure: 
       
     {
       "word": "The word"
@@ -126,6 +150,22 @@ def get_collins_dict(tree):
       ],
     }
     
+    Each element in the list is regarded as a distinct meaning of the word, and is independent of 
+    each other.
+    
+    However, if the word is not found, and there are suggestions, then the return
+    value is defined as below:
+    
+    {
+      "alternatives": ["word1", "word2", ...]
+    }
+    
+    The caller should check whether key "alternatives" is present, and if it is then it
+    implies that the word being queried is not found, and instead we return suggestions
+    that are similar to the word.
+    
+    If alternatives are also not found then we return None
+    
     :param tree: The beautiful soup tree
     :return: A list of the dict as specified as above, or None if fails
     """
@@ -133,13 +173,8 @@ def get_collins_dict(tree):
     if isinstance(collins_result, bs4.element.Tag) is False:
         dbg_printf("Did not find id='collinsResult'")
 
-        # Print suggested works or alternatives as there might be typos
-        # in user's input
-        print_alternatives(tree)
-
-        # it is not a valid div object (usually None if the tag does
-        # not exist)
-        return None
+        # This could also return None if alternatives are also not found
+        return get_alternatives(tree)
     elif collins_result.name != "div":
         dbg_printf("id='collinsResult' is not a div tag")
         # It is a valid tag, but the name is not div
