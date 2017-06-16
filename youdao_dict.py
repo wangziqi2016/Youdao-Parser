@@ -616,6 +616,7 @@ def collins_pretty_print(dict_list, output_device=sys.stdout):
     be None, in which case we skip printing
     
     :param dict_list: A list of dict objects returned from the parser
+                      Or a dict object implying the alternative words
     :param output_device: An output object that supports write() method
                           for printing or aggregating values
     :return: None
@@ -624,6 +625,17 @@ def collins_pretty_print(dict_list, output_device=sys.stdout):
     global m5_flag
 
     if dict_list is None:
+        return
+
+    # If it is the alternative list instead of a word dict list then we
+    # print out alternatives
+    if isinstance(dict_list, dict) and \
+       "alternatives" in dict_list:
+        output_device.write("The word is not found, but there are are few alternatives: \n")
+        # Print out each word
+        for word in dict_list["alternatives"]:
+            output_device.write("    " + word + "\n")
+
         return
 
     for d in dict_list:
