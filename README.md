@@ -1,5 +1,5 @@
 # Youdao-Parser
-Parses YouDao online dictionary's result and display them on the terminal in a pretty form 
+Parses YouDao online dictionary's result and display them on the terminal in a pretty form
 
     Usage (without installing): python youdao_dict.py [word] [--options]
     Usage (after installation): define [word] [--options]
